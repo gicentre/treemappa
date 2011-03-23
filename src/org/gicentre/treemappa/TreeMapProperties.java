@@ -14,7 +14,7 @@ import java.util.Properties;
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th February, 2011.
+ *  @version 3.0, 23rd March, 2011.
  */
 // ********************************************************************************************************
 
@@ -846,6 +846,7 @@ public class TreeMapProperties
 	private static Color getHexColour(String hexColour)
 	{
 		String alpha = "#ff";
+		String cleanHexColour;
 
 		if (hexColour.startsWith("#")) 
 		{
@@ -853,12 +854,16 @@ public class TreeMapProperties
 			if (hasAlpha) 
 			{
 				alpha = new String("#"+hexColour.substring(7, 9));
-				hexColour = hexColour.substring(0,7);
+				cleanHexColour = hexColour.substring(0,7);
+			}
+			else
+			{
+				cleanHexColour = hexColour;
 			}
 
 			try 
 			{
-				int rgba = Integer.decode(hexColour).intValue();	
+				int rgba = Integer.decode(cleanHexColour).intValue();	
 				int a = Integer.decode(alpha).intValue();    	    	
 				rgba = rgba | (a << 24);
 				return new Color(rgba, hasAlpha);

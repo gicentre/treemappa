@@ -9,7 +9,7 @@ import org.gicentre.treemappa.gui.JWFrame;
 // ***************************************************************************************************
 /** Class to display a tree graphically as a tree map and link node tree. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd February, 2011.
+ *  @version 3.0, 23rd March, 2011.
  */ 
 // ***************************************************************************************************
 
@@ -74,7 +74,7 @@ public class TreeFrame extends JWFrame
 
 		mapPanel.add(treemapPanel,BorderLayout.CENTER);
 
-		if (showTreeView)
+		if ((showTreeView) && (splitPane != null))
 		{
 			splitPane.add(mapPanel);
 			getContentPane().add(splitPane);

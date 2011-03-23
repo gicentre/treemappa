@@ -12,7 +12,7 @@ import javax.swing.tree.*;
  *  the size of the node, a numeric value representing the colour of the node and the sum of numeric
  *  size values below it in the tree.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd February, 2011
+ *  @version 3.0, 23rd March, 2011
  */ 
 // ****************************************************************************************************
 
@@ -156,10 +156,10 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 
 	/** Performs a breadth-first search looking for the first node with the given label. Note that this 
 	 *  search does not consider this node itself, but starts with its children. 
-	 *  @param label Text to search for.
+	 *  @param nodeLabel Text to search for.
 	 *  @return Highest level node matching the given label, or null if no match found.
 	 */
-	public TreeMapNode findNode(String label)
+	public TreeMapNode findNode(String nodeLabel)
 	{
 		if (isLeaf())
 		{
@@ -181,7 +181,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 				queue.add(child);
 			}
 
-			if (node.getLabel().equals(label))
+			if (node.getLabel().equals(nodeLabel))
 			{
 				return node;
 			}
@@ -897,6 +897,11 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	 */
 	private static class EWComparator implements Comparator<TreeMapNode>
 	{
+		public EWComparator() 
+		{
+			super();
+		}
+
 		/** Compares two nodes. If the first is to the left (west) of the second, -1 is returned. If to 
 		 * the right (east), 1 is returned, or 0 if both have the same easting.
 		 * @param node1 First node to compare.
@@ -934,6 +939,11 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	 */
 	private static class NSComparator implements Comparator<TreeMapNode>
 	{
+		public NSComparator() 
+		{
+			super();
+		}
+
 		/** Compares two nodes. If the first is to the below (south) of the second, -1 is returned. If above
 		 * (north), 1 is returned, or 0 if both have the same northing.
 		 * @param node1 First node to compare.
@@ -971,7 +981,6 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 
 
 	/** Rebuilds the tree by recalculating tree levels, accumulated values and maximum depth.
-	 * 
 	 */
 	private void rebuild()
 	{
@@ -980,11 +989,11 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 		// Find root node.
 		TreeMapNode root = this;
 
-		TreeMapNode parent = root.getParent();
-		while (parent != null)
+		TreeMapNode rootParent = root.getParent();
+		while (rootParent != null)
 		{
-			root = parent;
-			parent = root.getParent();
+			root = rootParent;
+			rootParent = root.getParent();
 		}
 		rebuild(root);
 		resetAccumulation(root);
@@ -1011,7 +1020,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	}
 
 	/** Propagates the maximum depth value up to the root node.
-	 */
+	 * /
 	private void updateMaxDepthx()
 	{
 		if (parent != null)
@@ -1023,11 +1032,12 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 			}
 		}
 	}
+	*/
 
-	/** Updates the level of the given node and all of its descendants. The level of any given node will
+	/* * Updates the level of the given node and all of its descendants. The level of any given node will
 	 *  be that of its parent plus one.
 	 *  @param node Node to update, along with all of its descendants.
-	 */
+	 * /
 	private void updateLevelsx(TreeMapNode node)
 	{
 		if (node.parent == null)
@@ -1045,6 +1055,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 			updateLevelsx(child);
 		}
 	}
+	*/
 
 	/** Resets the accumulation values for the given node and all its descendants based on 
 	 *  the values of any leaves found below the given node. This version recursively calls
@@ -1176,6 +1187,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 		{
 			node.sortChildren();
 		}
+		
 		for (TreeMapNode child : node.getChildren())
 		{
 			sortAtLevel(child,sortLevel);

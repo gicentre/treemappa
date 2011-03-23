@@ -22,12 +22,12 @@ import org.gicentre.utils.colour.ColourTable;
 import org.gicentre.utils.io.DOMProcessor;
 import org.w3c.dom.Node;
 
-//  *********************************************************************
-/** Class to read tree data and create tree maps and treemap output files. 
+//  **************************************************************************
+/** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th February, 2011.
+ *  @version 3.0, 23rd March, 2011.
  */
-//  *********************************************************************
+//  **************************************************************************
 
 /* This file is part of the giCentre treeMappa library. treeMappa is free software: you can 
  * redistribute it and/or modify it under the terms of the GNU Lesser General Public License
@@ -58,7 +58,7 @@ public class TreeMappa
 	private List<TreeMapNode>nodesToLayout;			// Children to be laid out in given node.
 	private Vector<OrderDistance> leafDistances;	// For R-squared calculation of order-distance relationship.
 
-	private double[] borderWidths;					// Width of border surrounding node in tree map.
+	private double[] borderWidths;					// Width of border surrounding node in treemap.
 
 	private double aspectRatio,readability,distDisplacement,angDisplacement;
 	private int numNodes, numAdjacentLeaves, numSpatialNodes;
@@ -81,9 +81,9 @@ public class TreeMappa
 
 	// ------------------------- Constructor ----------------------------
 
-	/** Creates an object capable of creating a tree map from the hierarchical data identified in the given
-	 *  properties. These properties can also specify the appearance and output format of the tree map.
-	 *  @param props Properties defining the data and appearance associated with the tree map.
+	/** Creates an object capable of creating a treemap from the hierarchical data identified in the given
+	 *  properties. These properties can also specify the appearance and output format of the treemap.
+	 *  @param props Properties defining the data and appearance associated with the treemap.
 	 */
 	public TreeMappa(TreeMapProperties props)
 	{
@@ -165,7 +165,7 @@ public class TreeMappa
 	}
 
 
-	/** Builds the tree map from the hierarchical data stored in this object. The size of the tree map
+	/** Builds the treemap from the hierarchical data stored in this object. The size of the treemap
 	 *  is determined by configuration properties supplied to the constructor. This method should
 	 *  only be called after <code>readData()</code> has been called to store the hierarchical data to map.
 	 *  @return True if the tree has been built without problems.
@@ -934,6 +934,11 @@ public class TreeMappa
 			}
 
 			// Find initial vector.
+			if ((child1 == null) || (child2 == null))
+			{
+				return;
+			}
+			
 			Rectangle2D r1 = child1.getRectangle();
 			Rectangle2D r2 = child2.getRectangle();
 			if ((r1 == null) || (r2 == null))
@@ -1078,7 +1083,7 @@ public class TreeMappa
 
 	}
 
-	/** Writes out the coordinates of the tree map as a text file for external processing.
+	/** Writes out the coordinates of the treemap as a text file for external processing.
 	 * @param out File to write to. 
 	 */
 	private void writeTreeMapAsText(BufferedWriter out) throws IOException
@@ -1411,14 +1416,15 @@ public class TreeMappa
 		return true;
 	}
 
-	/** Computes the tree map layout. Lays out all the children of the given parent node
+	/** Computes the treemap layout. Lays out all the children of the given parent node
 	 * then recursively calls itself to lay out all descendants. 
 	 * @param parent Parent node whose children will be laid out. 
-	 * @param rect Rectangle into which nodes must be laid out.
+	 * @param rectangle Rectangle into which nodes must be laid out.
 	 */
-	private void layout(TreeMapNode parent, Rectangle2D rect)
+	private void layout(TreeMapNode parent, Rectangle2D rectangle)
 	{
 		int level = parent.getLevel();
+		Rectangle2D rect = rectangle;
 
 		for (TreeMapNode child : parent.getChildren())
 		{
@@ -1531,12 +1537,14 @@ public class TreeMappa
 	 * corner of the rectangle. In either case, nodes are kept as square as possible.
 	 * If the given rectangle is too small to fit any nodes within it, no nodes are laid out.
 	 * @param nodes Nodes to lay out.
-	 * @param rect Rectangle in which to lay out nodes.
+	 * @param rectangle Rectangle in which to lay out nodes.
 	 * @param layoutType Either ORDERED_SQUARIFY or SPATIAL.
 	 * @param alignment Alignment constraint (HORIZONTAL, VERTICAL or FREE if no constraint).
 	 */
-	private void orderedSquarify(List<TreeMapNode>nodes, Rectangle2D rect, Layout layoutType, Layout alignment) 
+	private void orderedSquarify(List<TreeMapNode>nodes, Rectangle2D rectangle, Layout layoutType, Layout alignment) 
 	{
+		Rectangle2D rect = rectangle;
+		
 		// Check rectangle is large enough to fit nodes within it.
 		if ((rect.getWidth() <= 0) ||  (rect.getHeight() <= 0))
 		{
@@ -1591,7 +1599,7 @@ public class TreeMappa
 				x = globalXMin + (int)((i+0.5)*yInc/rect.getHeight())*xInc;
 				y = rect.getY() + ((i+0.5)*yInc)%rect.getHeight();
 			}  
-			double dist = Math.sqrt((x-globalXMin)*(x-globalXMin)+(y-globalYMin)*(y-globalYMin));
+			Double dist = new Double(Math.sqrt((x-globalXMin)*(x-globalXMin)+(y-globalYMin)*(y-globalYMin)));
 			distances.add(new LocatedObject(x,y,dist));		
 		}  	
 		distances.sortByDistance(new Point2D.Double(globalXMin,globalYMin));
@@ -1657,7 +1665,7 @@ public class TreeMappa
 		}
 
 		List<TreeMapNode> row = new Vector<TreeMapNode>();
-		double aspectRatio = Double.MAX_VALUE, newAspectRatio;
+		double oldAspectRatio = Double.MAX_VALUE, newAspectRatio;
 		double xOffset = 0,yOffset=0;
 		double xPos = rect.getX()+ 0.5*xInc,
 		yPos = rect.getY() + 0.5*yInc;
@@ -1706,10 +1714,10 @@ public class TreeMappa
 				newAspectRatio = getWorstAspectRatio(row, layoutSide,stripAR);
 			}
 
-			if (newAspectRatio <= aspectRatio) 
+			if (newAspectRatio <= oldAspectRatio) 
 			{
 				locatedNodes.remove(locatedNode);	
-				aspectRatio = newAspectRatio;  
+				oldAspectRatio = newAspectRatio;  
 				n++;
 			}             
 			else 
@@ -1734,7 +1742,7 @@ public class TreeMappa
 				row.clear(); // clear the row
 				xOffset = 0;
 				yOffset = 0;             
-				aspectRatio = Double.MAX_VALUE;  
+				oldAspectRatio = Double.MAX_VALUE;  
 
 				// Distribute the remaining nodes evenly within the remaining space.
 				xInc = Math.sqrt(targetAR*rect.getWidth()*rect.getHeight()/locatedNodes.size());
@@ -1838,15 +1846,16 @@ public class TreeMappa
 	 * computationally efficient, produces good aspect ratios, but can lead to 
 	 * non-intuitive ordering of nodes.
 	 * @param nodes Nodes to lay out.
-	 * @param rect Rectangle in which to lay out nodes.
+	 * @param rectangle Rectangle in which to lay out nodes.
 	 * @param alignment Alignment constraint (HORIZONTAL, VERTICAL or FREE if no constraint).
 	 */
-	private void squarify(List<TreeMapNode>nodes, Rectangle2D rect, Layout alignment) 
+	private void squarify(List<TreeMapNode>nodes, Rectangle2D rectangle, Layout alignment) 
 	{
 		double stripAR;
 		List<TreeMapNode> row = new Vector<TreeMapNode>();
 		double worst = Double.MAX_VALUE, nworst;
 		double layoutSide;
+		Rectangle2D rect = rectangle;
 
 		if ((alignment == Layout.HORIZONTAL) || ((alignment==Layout.FREE) && (rect.getWidth() <= rect.getHeight())))
 		{
@@ -2258,12 +2267,13 @@ public class TreeMappa
 
 	/** Lays out the given nodes inside the given rectangle in Morton order. 
 	 * @param nodes Nodes to lay out.
-	 * @param rect Rectangle in which to lay out nodes.
+	 * @param rectangle Rectangle in which to lay out nodes.
 	 */
-	private void mortonise(MortonList<TreeMapNode>nodes, Rectangle2D rect) 
+	private void mortonise(MortonList<TreeMapNode>nodes, Rectangle2D rectangle) 
 	{
 		List<TreeMapNode> column = new Vector<TreeMapNode>();
 		int nodesToProcess = nodes.size();
+		Rectangle2D rect = rectangle;
 
 		if (nodesToProcess == 0)
 		{
@@ -2330,7 +2340,7 @@ public class TreeMappa
 		// Set node positions and dimensions.
 		for (TreeMapNode node : nodes)
 		{
-			TreeMapNode p = (TreeMapNode)node.getParent();
+			TreeMapNode p = node.getParent();
 			node.setRectangle(new Rectangle2D.Double(p.getRectangle().getX(),p.getRectangle().getY(),0,0));
 
 			Rectangle2D.Double newRect = new Rectangle2D.Double();
@@ -2422,12 +2432,12 @@ public class TreeMappa
 		return rect;
 	}
 
-	/** Reports the highest aspect ratio (least square) of the given list of nodes if
+	/* * Reports the highest aspect ratio (least square) of the given list of nodes if
 	 * laid out along the given length. 
 	 * @param nodes Nodes to consider.
 	 * @param sideLength Length of side along which nodes are to be laid out.
 	 * @return Highest aspect ratio produced by the given nodes if arranged along the given length.
-	 */
+	 * /
 	private double getWorstAspectRatio(List<TreeMapNode> nodes, double sideLength) 
 	{
 		double aMax = -Double.MAX_VALUE, 
@@ -2445,14 +2455,16 @@ public class TreeMappa
 		double sideLengthSq = sideLength*sideLength;      
 		return Math.max(sideLengthSq*aMax/totalAreaSq, totalAreaSq/(sideLengthSq*aMin));
 	}
+	*/
 
 	/** Reports the highest aspect ratio (least square) of the given list of nodes if
-	 * laid out along the given length. 
-	 * @param nodes Nodes to consider.
-	 * @param sideLength Length of side along which nodes are to be laid out.
-	 * @return Highest aspect ratio produced by the given nodes if arranged along the given length.
+	 *  laid out along the given length. 
+	 *  @param nodes Nodes to consider.
+	 *  @param sideLength Length of side along which nodes are to be laid out.
+	 *  @param targetAspectRatio Target aspect ratio being aimed for.
+	 *  @return Highest aspect ratio produced by the given nodes if arranged along the given length.
 	 */
-	private double getWorstAspectRatio(List<TreeMapNode> nodes, double sideLength, double targetAR) 
+	private double getWorstAspectRatio(List<TreeMapNode> nodes, double sideLength, double targetAspectRatio) 
 	{
 		double aMax = -Double.MAX_VALUE, 
 		aMin = Double.MAX_VALUE, 
@@ -2467,7 +2479,7 @@ public class TreeMappa
 		}
 		double totalAreaSq = totalArea*totalArea; 
 		double sideLengthSq = sideLength*sideLength;      
-		return Math.max(sideLengthSq*aMax/(totalAreaSq*targetAR), (totalAreaSq*targetAR)/(sideLengthSq*aMin));
+		return Math.max(sideLengthSq*aMax/(totalAreaSq*targetAspectRatio), (totalAreaSq*targetAspectRatio)/(sideLengthSq*aMin));
 	}
 
 	/** Reports the mean aspect ratio of the given list of nodes if laid out along the given length. 
@@ -2497,13 +2509,13 @@ public class TreeMappa
 		return totalAr/nodes.size();
 	}
 
-	/** Reports the mean displacement of the nodes being laid out in the given rectangle. 
+	/* * Reports the mean displacement of the nodes being laid out in the given rectangle. 
 	 * @param nodes Nodes to consider.
 	 * @param rect Rectangle in which nodes are to be laid out.
 	 * @param totalNodeArea Area of all nodes that will have to be laid out.
 	 * @param isHorizontal True if nodes to be laid out in a row, or false if down a column.
 	 * @return Mean displacement of nodes if laid out in a row or column.
-	 */
+	 * /
 	private double getAvDisplacement(List<LocatedObject> nodes, Rectangle2D rect, double totalNodeArea, boolean isHorizontal) 
 	{
 		double disp = 0;		// Displacement.
@@ -2552,13 +2564,14 @@ public class TreeMappa
 
 		return disp/nodes.size();
 	}
+	*/
 
-	/** Reports the weighted mean aspect ratio of the given list of nodes if laid out along the
+	/* * Reports the weighted mean aspect ratio of the given list of nodes if laid out along the
 	 * given length. Aspect ratios are weighted according to the size of each node. 
 	 * @param nodes Nodes to consider.
 	 * @param sideLength Length of side along which nodes are to be laid out.
 	 * @return Weighted mean aspect ratio produced by the given nodes if arranged along the given length.
-	 */
+	 * /
 	private double getAvWeightedAspectRatio(List<TreeMapNode> nodes, double sideLength) 
 	{
 		double totalArea = 0.0;
@@ -2582,6 +2595,7 @@ public class TreeMappa
 		}          
 		return totalAR/(sumWeights*nodes.size());
 	}
+	*/
 
 	/** Builds a tree from the given collection of DOM nodes representing a set of branches.
 	 *  Recursively searches the branches for any sub trees. Will order sibling nodes in
@@ -2608,7 +2622,7 @@ public class TreeMappa
 				}
 			}
 
-			if (tree == null)
+			if ((tree == null) || (parent==null))
 			{
 				// This must be the root node.
 				thisNode = new TreeMapNode(branchName,0,null,null);

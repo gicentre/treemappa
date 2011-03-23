@@ -5,7 +5,7 @@ import java.io.File;
 //  **************************************************************************
 /** Class to read treeMappa command line parameters and start the application. 
   * @author Jo Wood, giCentre.
-  * @version 3.0, 28th February, 2011.
+  * @version 3.0, 23rd March, 2011.
   */ 
 //  **************************************************************************
 
@@ -146,6 +146,7 @@ public class TreeMapApp
     	}
     }
     
+    /*
     private static void createSampleTree(TreeMappa treeMappa)
     {    	    	
     	// Constructor parameters: Label, order, size, colour, level
@@ -182,4 +183,5 @@ public class TreeMapApp
     
     	treeMappa.setRoot(root);
     }
+    */
 }

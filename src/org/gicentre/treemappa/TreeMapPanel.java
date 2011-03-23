@@ -76,9 +76,10 @@ public class TreeMapPanel extends JPanel
 	private static final double PI_OVER_TWO = Math.PI/2.0;
 
 	private BufferedImage screenImg; 
-	private Point clickPosition,       	// Initial mouse position at start of drag.
-	oldPosition;         	// Mouse position since last dragged position.
-	private int mode;                  	// Type of interaction mode.
+	Point clickPosition;         	// Mouse position since last dragged position.
+
+	Point oldPosition;
+	int mode;                  	// Type of interaction mode.
 	private TreeMappa treeMappa;		// TreeMappa object capable of recalculating treemap geometry.
 
 	private Font leafFont;				// Label fonts.
@@ -112,8 +113,12 @@ public class TreeMapPanel extends JPanel
 	private AffineTransform trans,    	// Georef to pixel transformation.
 	iTrans;    	// Pixel to georef transformation.
 
-	private Point2D.Float panOffset,localPanOffset;
-	private float zoomFactor,localZoomFactor;
+	Point2D.Float panOffset;
+
+	Point2D.Float localPanOffset;
+	float zoomFactor;
+
+	float localZoomFactor;
 	// Pattern matching to make SVG output XML-safe.
 	private Pattern cleanAmp,cleanLT,cleanGT,cleanQuote;
 
@@ -135,6 +140,7 @@ public class TreeMapPanel extends JPanel
 	 *  @param height Default height of the tree map. 
 	 *  @param treeMappa Object capable of creating a treemap.
 	 */
+	@SuppressWarnings("unchecked")
 	public TreeMapPanel(int width, int height, TreeMappa treeMappa)
 	{
 		super();
@@ -809,6 +815,18 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}
 
+
+	/** Sets the colour used to display treemap borders. This version uses a single RGBA integer to
+	 *  represent the colour and is compatible with Processing's storage of colour values. Note that
+	 *  the treemap will not use this new setting until a call to <code>updateImage()</code> is made.
+	 *  @param borderColour New colour in which to display treemap node borders.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setBorderColour(int borderColour)
+	{
+		return setBorderColour(new Color(borderColour));
+	}
+	
 	/** Sets the colour used to display treemap borders. Note that the treemap will not use this new 
 	 *  setting until a call to <code>updateImage()</code> is made.
 	 *  @param borderColour New colour in which to display treemap node borders.
@@ -819,6 +837,17 @@ public class TreeMapPanel extends JPanel
 		this.borderColour = borderColour;
 		treeMappa.getConfig().setParameter("borderColour", ColourTable.getHexString(borderColour.getRGB()));
 		return true;
+	}
+	
+	/** Sets the colour used to display leaf text. This version uses a single RGBA integer to represent 
+	 *  the colour and is compatible with Processing's storage of colour values. Note that the treemap
+	 *  will not use this new setting until a call to <code>updateImage()</code> is made.
+	 *  @param textColour New colour in which to display treemap leaf labels.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setLeafTextColour(int textColour)
+	{
+		return setLeafTextColour(new Color(textColour));
 	}
 
 	/** Sets the colour used to display leaf text. Note that the treemap will not use this new 
@@ -839,6 +868,17 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}
 
+	/** Sets the colour used to display text at all branch levels. This version uses a single RGBA
+	 *  integer to represent the colour and is compatible with Processing's storage of colour values.
+	 *  Note that the treemap will not use this new  setting until a call to <code>updateImage()</code> is made.
+	 *  @param textColour New colour in which to display treemap branch labels.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setBranchTextColours(int textColour)
+	{
+		return setBranchTextColours(new Color(textColour));
+	}
+	
 	/** Sets the colour used to display text at all branch levels. Note that the treemap will 
 	 *  not use this new  setting until a call to <code>updateImage()</code> is made.
 	 *  @param textColour New colour in which to display treemap branch labels.
@@ -860,6 +900,18 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}
 
+	/** Sets the colour used to display branch text at the given level. This version uses a single RGBA
+	 *  integer to represent the colour and is compatible with Processing's storage of colour values. 
+	 *  Note that the treemap will not use this new setting until a call to <code>updateImage()</code> is made.
+	 *  @param level Hierarchy level at which to make the change.
+	 *  @param textColour New colour in which to display treemap branch labels at the given level.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setBranchTextColour(int level, int textColour)
+	{
+		return setBranchTextColour(level, new Color(textColour));
+	}
+	
 	/** Sets the colour used to display branch text at the given level. Note that the treemap will 
 	 *  not use this new setting until a call to <code>updateImage()</code> is made.
 	 *  @param level Hierarchy level at which to make the change.
@@ -885,7 +937,9 @@ public class TreeMapPanel extends JPanel
 	}
 
 	/** Sets the font used to display text at all branch levels. Note that the treemap will 
-	 *  not use this new  setting until a call to <code>updateImage()</code> is made.
+	 *  not use this new  setting until a call to <code>updateImage()</code> is made.  Note also that
+	 *  this will have no effect on the treemaps drawn directly in Processing via <code>PTreeMappa.draw()</code>,
+	 *  which uses the currently selected Processing font for all labels.
 	 *  @param fontName Name of new font in which to display treemap branch labels.
 	 *  @return True if change has been made successfully.
 	 */
@@ -902,7 +956,9 @@ public class TreeMapPanel extends JPanel
 	}
 
 	/** Sets the font used to display branch text at the given level. Note that the treemap will 
-	 *  not use this new setting until a call to <code>updateImage()</code> is made.
+	 *  not use this new setting until a call to <code>updateImage()</code> is made. Note also that
+	 *  this will have no effect on the treemaps drawn directly in Processing via <code>PTreeMappa.draw()</code>,
+	 *  which uses the currently selected Processing font for all labels.
 	 *  @param level Hierarchy level at which to make the change.
 	 *  @param fontName Name of font in which to display treemap branch labels at the given level.
 	 *  @return True if change has been made successfully.
@@ -920,7 +976,9 @@ public class TreeMapPanel extends JPanel
 	}
 
 	/** Sets the font used to display leaf text. Note that the treemap will not use this new setting
-	 *  until a call to <code>updateImage()</code> is made.
+	 *  until a call to <code>updateImage()</code> is made.  Note also that this will have no 
+	 *  effect on the treemaps drawn directly in Processing via <code>PTreeMappa.draw()</code>,
+	 *  which uses the currently selected Processing font for all labels.
 	 *  @param fontName New font in which to display treemap leaf labels.
 	 *  @return True if change has been made successfully.
 	 */
@@ -1334,8 +1392,8 @@ public class TreeMapPanel extends JPanel
 	// ----------------------------- Private Methods -------------------------------
 
 	/** Adds the graphical representations of the given node and all its descendants
-	 * to the main graphics panel representing the tree map.
-	 * @param node Node to add to the panel. 
+	 *  to the main graphics panel representing the tree map.
+	 *  @param node Node to add to the panel. 
 	 */
 	private void addRectangles(TreeMapNode node, Color parentColour)
 	{
@@ -1350,6 +1408,7 @@ public class TreeMapPanel extends JPanel
 		double minY = Float.MAX_VALUE;
 		double maxY = -Float.MAX_VALUE;
 		double xRange = 0, yRange = 0;
+		Color rectParentColour = parentColour;
 
 		// Only process spatial nodes.
 		if (node.getLocation() != null)
@@ -1390,7 +1449,7 @@ public class TreeMapPanel extends JPanel
 			if (level < randColourLevel)
 			{
 				// Ensure colour remains random up to the randcolourLevel
-				parentColour = null;
+				rectParentColour = null;
 			}
 
 
@@ -1399,7 +1458,7 @@ public class TreeMapPanel extends JPanel
 			{
 				childColour = getColour(child.getColourValue().floatValue());
 			}
-			else if (parentColour == null)
+			else if (rectParentColour == null)
 			{
 				if ((hues[level] == null) || (hues[level].size() == 0))
 				{
@@ -1408,7 +1467,7 @@ public class TreeMapPanel extends JPanel
 					hues[level] = new Vector<Float>();
 					for (int i=0; i<numSiblings; i++)
 					{
-						hues[level].add(h);
+						hues[level].add(new Float(h));
 						h += 1f/numSiblings;
 					}
 				}
@@ -1424,7 +1483,7 @@ public class TreeMapPanel extends JPanel
 						node.getRectangle().getY()+node.getRectangle().getHeight() - (node.getRectangle().getHeight()*(northing-minY)/yRange));
 			}
 
-			NodePanel nPanel = new NodePanel(this,child.getLabel(),child.getRectangle(),geoCentre,child.isLeaf(),child.getSizeValue()<0,hue, childColour,parentColour,child.getLevel());
+			NodePanel nPanel = new NodePanel(this,child.getLabel(),child.getRectangle(),geoCentre,child.isLeaf(),child.getSizeValue()<0,hue, childColour,rectParentColour,child.getLevel());
 			if (child.isLeaf())
 			{
 				leaves.add(nPanel);
@@ -1454,10 +1513,10 @@ public class TreeMapPanel extends JPanel
 	 * @param p1y y coordinate of the start point of the arrow.
 	 * @param p2x x coordinate of the end point of the arrow.
 	 * @param p2y y coordinate of the end point of the arrow.
-	 * @param showArrowHead Arrow head drawn if true.
+	 * @param showHead Arrow head drawn if true.
 	 * @return Path representing the arrow.
 	 */
-	private GeneralPath getArrow(float p1x, float p1y, float p2x, float p2y, float lineWidth, boolean showArrowHead)
+	private GeneralPath getArrow(float p1x, float p1y, float p2x, float p2y, float lineWidth, boolean showHead)
 	{
 		GeneralPath path = new GeneralPath();
 
@@ -1479,13 +1538,12 @@ public class TreeMapPanel extends JPanel
 		path.moveTo(p1x, p1y);
 		path.quadTo(cx, cy, p2x, p2y);
 
-		if (showArrowHead)
+		if (showHead)
 		{
 			path.lineTo(p2x + (ey-ex)*arrowSize, p2y - (ex + ey)*arrowSize);
 			path.moveTo(p2x, p2y);
 			path.lineTo(p2x - (ey + ex)*arrowSize, p2y + (ex - ey)*arrowSize);
 		}
-
 		return path;
 	}
 
@@ -1497,10 +1555,10 @@ public class TreeMapPanel extends JPanel
 	 * @param p1y y coordinate of the start point of the arrow.
 	 * @param p2x x coordinate of the end point of the arrow.
 	 * @param p2y y coordinate of the end point of the arrow.
-	 * @param showArrowHead Arrow head drawn if true.
+	 * @param showHead Arrow head drawn if true.
 	 * @return SVG text representing the arrow.
 	 */
-	private String getSVGArrow(double p1x, double p1y, double p2x, double p2y, double lineWidth, boolean showArrowHead)
+	private String getSVGArrow(double p1x, double p1y, double p2x, double p2y, double lineWidth, boolean showHead)
 	{
 		// Set the control point to 60 to the right of the vector, along a quarter its length
 		double x = (p2x-p1x)/4.0;
@@ -1516,7 +1574,7 @@ public class TreeMapPanel extends JPanel
 		ex /= abs_e;
 		ey /= abs_e;
 
-		if (showArrowHead)
+		if (showHead)
 		{
 			return new String("<path d=\"M "+p1x+" "+p1y+" Q "+cx+" "+cy+" "+p2x+" "+p2y+
 					" L "+(p2x + (ey-ex)*arrowSize)+" "+(p2y - (ex+ey)*arrowSize)+
@@ -1531,10 +1589,10 @@ public class TreeMapPanel extends JPanel
 	/** Writes out the treemap as an SVG file. If the file name extension
 	 * is <code>.svgz</code>, then the SVG file will be compressed using GZIP compression.
 	 * @param fileName Name of file to create.
-	 * @param isTransparent SVG output uses transparency if true. No transparency (false) is useful for PDF conversion.
+	 * @param svgIsTransparent SVG output uses transparency if true. No transparency (false) is useful for PDF conversion.
 	 * @return True if written successfully.
 	 */
-	private boolean writeSVG(String fileName, boolean isTransparent)
+	private boolean writeSVG(String fileName, boolean svgIsTransparent)
 	{
 		try
 		{    
@@ -1563,7 +1621,7 @@ public class TreeMapPanel extends JPanel
 			writeLine("<!-- Format definitions -->", outFile);
 			writeLine("<defs>", outFile);
 			writeLine(" <style type=\"text/css\"><![CDATA[",outFile);
-			if (isTransparent)
+			if (svgIsTransparent)
 			{
 				writeLine("   #leafDisp   { stroke:black; stroke-width:"+(leafVectorWidth*multiplier)+"; stroke-opacity:0.6; fill:none; }",outFile);
 				writeLine("   #branchDisp { stroke:black; stroke-width:"+(10*vectorWidths[0]*multiplier)+"; stroke-opacity:0.6; fill:none; }",outFile);
@@ -1656,16 +1714,6 @@ public class TreeMapPanel extends JPanel
 						horizScale = Math.min(horizXScale, horizYScale);
 						vertScale  = Math.min(vertXScale, vertYScale);
 
-						/*
-				        float xScale = bounds.width / maxWidth;
-				        float yScale = bounds.height / totalHeight;
-				        float scale = xScale;
-				        if (xScale > yScale)
-				        {
-				        	scale = yScale;
-				        }
-						 */
-
 						if (maxLeafText > 0)
 						{
 							if (horizScale > maxLeafText/40f)
@@ -1700,7 +1748,7 @@ public class TreeMapPanel extends JPanel
 									writeLine("<g id=\"vertLabel\" transform=\"translate("+cx+","+cy+") rotate(90) translate(-"+cx+",-"+cy+")\">" , outFile);
 								}
 
-								if (isTransparent)
+								if (svgIsTransparent)
 								{
 									writeLine("<text fill=\""+hexLeafTextColour+"\" style=\"opacity:"+alpha+"\" x=\""+(multiplier*(bounds.x+bounds.width/2.0))+"\" y=\""+(multiplier*y)+"\" font-size=\""+(multiplier*fontSize)+"\" >"+lines[i]+"</text>",outFile);
 								}
@@ -1760,19 +1808,6 @@ public class TreeMapPanel extends JPanel
 						horizScale = Math.min(horizXScale, horizYScale);
 						vertScale  = Math.min(vertXScale, vertYScale);
 
-						/*
-				        float xScale = bounds.width / maxWidth;
-				        float yScale = bounds.height / totalHeight;
-
-				        float scale = xScale;
-				        if (xScale > yScale)
-				        {
-				        	scale = yScale;
-				        }
-						 */
-
-						// scale = (float)(scale*0.7 + (0.3*bounds.width*bounds.height) / rootArea);
-
 						horizScale = (float)(horizScale*0.7 + (0.3*bounds.width*bounds.height) / rootArea);
 						vertScale = (float)(vertScale*0.7 + (0.3*bounds.width*bounds.height) / rootArea);
 
@@ -1817,7 +1852,7 @@ public class TreeMapPanel extends JPanel
 
 								if (level==1)
 								{
-									if (isTransparent)
+									if (svgIsTransparent)
 									{
 										writeLine("<text style=\"opacity:"+alpha+"; font-weight:bold\" fill=\""+hexBranchTextColour+"\" x=\""+(multiplier*(bounds.x+bounds.width/2.0))+"\" y=\""+(multiplier*y)+"\" font-size=\""+(multiplier*(fontSize*1.1))+"\" >"+lines[i]+"</text>",outFile);
 									}
@@ -1828,7 +1863,7 @@ public class TreeMapPanel extends JPanel
 								}
 								else
 								{
-									if (isTransparent)
+									if (svgIsTransparent)
 									{
 										writeLine("<text style=\"opacity:"+alpha+"\" fill=\""+hexBranchTextColour+"\" x=\""+(multiplier*(bounds.x+bounds.width/2.0))+"\" y=\""+(multiplier*y)+"\" font-size=\""+(multiplier*fontSize)+"\" >"+lines[i]+"</text>",outFile);
 									}
@@ -1946,7 +1981,7 @@ public class TreeMapPanel extends JPanel
 	/** Calculates the transformations required to convert between
 	 * pixel coordinates and georeferenced coordinates.
 	 */
-	private void calcTransformation()
+	void calcTransformation()
 	{
 		int panelWidth  = getWidth();
 		int panelHeight = getHeight();
@@ -2010,7 +2045,7 @@ public class TreeMapPanel extends JPanel
 	 * @param geo Georeferenced coordinate pair to transform.
 	 * @return Pixel coordinate pair representing the given georeferenced point.
 	 */
-	private Point2D getGeoToPixel(Point2D geo)
+	Point2D getGeoToPixel(Point2D geo)
 	{
 		Point2D pxl = new Point2D.Float();
 		trans.transform(geo,pxl);
@@ -2075,6 +2110,12 @@ public class TreeMapPanel extends JPanel
 	 */
 	private class MouseClickMonitor extends MouseAdapter
 	{
+		
+		public MouseClickMonitor() 
+		{
+			super();
+		}
+
 		/** Handles a mouse click in the panel. Allows panning and zooming of the tree map image.  
 		 * @param e Mouse event associated with the click.
 		 */
@@ -2112,6 +2153,11 @@ public class TreeMapPanel extends JPanel
 	 */
 	private class MouseMoveMonitor extends MouseMotionAdapter
 	{    
+		public MouseMoveMonitor() 
+		{
+			super();
+		}
+
 		/** Checks for mouse dragging and performs the relevant graphical feedback
 		 * depending on the display mode (panning, zooming, etc.).
 		 * @param mouseEvent Mouse dragging event.
@@ -2170,6 +2216,11 @@ public class TreeMapPanel extends JPanel
 	 */
 	private class MouseWheelMonitor implements MouseWheelListener
 	{
+		public MouseWheelMonitor() 
+		{
+			super();
+		}
+
 		/** Responds to a mouse wheel change event by zooming in or out of the image.
 		 * @param event Mouse wheel event.
 		 */
@@ -2220,6 +2271,11 @@ public class TreeMapPanel extends JPanel
 	 */
 	private class PanelSizeMonitor extends ComponentAdapter
 	{
+		public PanelSizeMonitor() 
+		{
+			super();
+		}
+
 		/** Handles panel resizing events by updating the pixel georeference
 		 * transformation to account for new panel dimensions.
 		 * @param e Panel resizing event.

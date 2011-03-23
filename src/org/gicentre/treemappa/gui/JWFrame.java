@@ -17,7 +17,7 @@ import java.net.*;             // For icon handling.
  *  necessary. This icon should be located at images/blank.gif in the classpath of the VM that uses 
  *  this class.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd February, 2011.
+ *  @version 3.0, 23rd March, 2011.
  */
 //  ***************************************************************************************************
 
@@ -44,11 +44,26 @@ public class JWFrame extends JFrame implements Runnable
 	private JMenuBar    menuBar;
 	private JWStatusBar statusBar;
 	private JToolBar    toolBar;
-	private List<JMenuItem> menuItems;
-	private List<AbstractButton>buttons;
-	private ImageIcon   blankIcon,trueCheckIcon,falseCheckIcon,trueCheckIconG,falseCheckIconG;
-	private ImageIcon   trueRadioIcon,falseRadioIcon,trueRadioIconG,falseRadioIconG;   
+	List<JMenuItem> menuItems;
+	List<AbstractButton>buttons;
+	private ImageIcon   blankIcon;
 
+	ImageIcon trueCheckIcon;
+
+	ImageIcon falseCheckIcon;
+
+	ImageIcon trueCheckIconG;
+
+	ImageIcon falseCheckIconG;
+	ImageIcon   trueRadioIcon;
+
+	ImageIcon falseRadioIcon;
+
+	ImageIcon trueRadioIconG;
+
+	ImageIcon falseRadioIconG;   
+
+	@SuppressWarnings("hiding")
 	private static final int NORMAL   = 1;
 	private static final int CHECKBOX = 2;
 
@@ -484,16 +499,17 @@ public class JWFrame extends JFrame implements Runnable
 	 * @param type Type of menu (NORMAL, CHECKBOX).
 	 * @param menu Menu onto which this menu item is added.
 	 * @param name Name on the new menu item to add.
-	 * @param icon Name of file containing icon or null if no icon.
+	 * @param iconName Name of file containing icon or null if no icon.
 	 * @param mnemonic Keyboard mnemonic to use.
 	 * @param accelerator Keyboard accelerator to use. Uses the system-dependent mask (e.g. CTRL on windows, Command on MacOS).
 	 * @param bg Button group for linking items together.
 	 * @param listener Action listener to respond to menu or button selection.
 	 * @return Reference to the menu item just created. This is useful for adding sub-menus.
 	 */
-	public JMenuItem addActionItem(int type, JMenuItem menu, String name, String icon, int mnemonic, int accelerator, ButtonGroup bg, ActionListener listener)
+	public JMenuItem addActionItem(int type, JMenuItem menu, String name, String iconName, int mnemonic, int accelerator, ButtonGroup bg, ActionListener listener)
 	{
 		ImageIcon iGhost=null, iRollover=null;
+		String icon = iconName;
 
 		// Store lower case version without ellipsis.
 		String actionName = name.toLowerCase();
@@ -857,6 +873,11 @@ public class JWFrame extends JFrame implements Runnable
 	 */
 	private class WinMonitor extends WindowAdapter
 	{  
+		public WinMonitor() 
+		{
+			super();
+		}
+
 		/** Responds to attempt to close window via the GUI. Checks
 		 * the user really wants to quite before closing down.
 		 * @param event Window closing event.
@@ -872,6 +893,8 @@ public class JWFrame extends JFrame implements Runnable
 	 */
 	private class MyAction extends AbstractAction
 	{  
+		private static final long serialVersionUID = 1643832400778944423L;
+		
 		private ActionListener listener;    // Class to respond to action events.
 
 		/** Creates the action with given name, icon and action listener.
@@ -950,7 +973,7 @@ public class JWFrame extends JFrame implements Runnable
 		}
 
 		/** Sets the state of the checkbox item.
-		 * @param state New state of the checkbox item.
+		 *  @param state New state of the checkbox item.
 		 */ 
 		public void setSelected(boolean state)
 		{        
@@ -981,11 +1004,11 @@ public class JWFrame extends JFrame implements Runnable
 					// If part of a button group, set all others to false.
 					if (bg != null)
 					{
-						Enumeration e = bg.getElements();
+						Enumeration<AbstractButton> e = bg.getElements();
 
 						while (e.hasMoreElements())
 						{
-							AbstractButton b = (AbstractButton)e.nextElement();
+							AbstractButton b = e.nextElement();
 							if (b != this)
 							{
 								b.setSelected(false);
@@ -998,12 +1021,12 @@ public class JWFrame extends JFrame implements Runnable
 					// Don't allow groups to contain all unchecked items.
 					if ((bg != null))
 					{
-						Enumeration e = bg.getElements();
+						Enumeration<AbstractButton> e = bg.getElements();
 						boolean allowed = false;
 
 						while (e.hasMoreElements())
 						{
-							AbstractButton b = (AbstractButton)e.nextElement();
+							AbstractButton b = e.nextElement();
 							if (b.isSelected())
 							{
 								allowed = true;
