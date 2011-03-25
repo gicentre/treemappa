@@ -5,7 +5,7 @@ import java.awt.geom.Point2D;
 //  *********************************************************************
 /** Stores a 2D location which can be attached to any object.
   * @author Jo Wood. giCentre.
-  * @version 3.0, 24th February, 2011.
+  * @version 3.0, 25th March, 2011.
   */ 
 //  *********************************************************************
 
@@ -29,6 +29,7 @@ public class LocatedObject implements Comparable<LocatedObject>
 	
 	private double distance;
 	private Point2D point;
+	@SuppressWarnings("rawtypes")
 	private Comparable obj;
 	private boolean sortByObject;
 	
@@ -39,6 +40,7 @@ public class LocatedObject implements Comparable<LocatedObject>
 	  * @param y Y-coordinate of location. 
 	  * @param obj Object with which to attach location.
 	  */
+	@SuppressWarnings("rawtypes")
 	public LocatedObject(double x, double y, Comparable obj)
 	{
 		point = new Point2D.Double(x,y);
@@ -78,6 +80,7 @@ public class LocatedObject implements Comparable<LocatedObject>
 	/** Reports the object that has been given a location. This can be null if no object assigned.
 	  * @return Object that has been given a location.
 	  */
+	@SuppressWarnings("rawtypes")
 	public Comparable getObject()
 	{
 		return obj;
@@ -88,6 +91,7 @@ public class LocatedObject implements Comparable<LocatedObject>
       * @param otherLocation Location with which to make comparison.
       * @return Positive if this object closer to origin, negative if the other is closer, or 0 if equal distance.
       */	
+	@SuppressWarnings("unchecked")
 	public int compareTo(LocatedObject otherLocation) 
 	{
 		int comparison=0;

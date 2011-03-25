@@ -142,7 +142,7 @@ public class DbaseFileWriter
         int r = buffer.remaining();
         while ( (r -= channel.write(buffer)) > 0) 
         {
-            ; // do nothing
+            // Do nothing
         }
     }
     
@@ -179,7 +179,8 @@ public class DbaseFileWriter
                     o = formatter.getFieldString(fieldLen, 0, (Number) (obj == null ? NULL_NUMBER : obj));
                     break;
                 }
-                
+                                
+            //$FALL-THROUGH$
             case 'F':
             case 'f':
                 o = formatter.getFieldString(fieldLen, header.getFieldDecimalCount(col),(Number) (obj == null ? NULL_NUMBER : obj));

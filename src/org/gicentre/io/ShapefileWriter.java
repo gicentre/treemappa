@@ -126,7 +126,8 @@ public class ShapefileWriter
       *                 or <code>A.dbf</code> depending on the geometry type.
       * @return True if attribute table written successfully. 
       */
-    private static boolean writeDBF(TreeMapNode node, String baseName)
+    @SuppressWarnings("boxing")
+	private static boolean writeDBF(TreeMapNode node, String baseName)
     {
         // NOTE: This should be called after the number of objects to be written has been determined.
         String fileName = new String(baseName+".dbf");

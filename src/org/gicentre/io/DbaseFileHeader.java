@@ -92,7 +92,8 @@ public class DbaseFileHeader
      * @param i The index of the field, from 0 to <code>getNumFields() - 1</code> .
      * @return A Class which closely represents the dbase field type.
      */
-    public Class getFieldClass(int i) 
+    @SuppressWarnings("rawtypes")
+	public Class getFieldClass(int i) 
     {
         Class typeClass = null;
     
@@ -408,7 +409,8 @@ public class DbaseFileHeader
       * call <code>java.nio.Channels.getChannel(InputStream in)</code>.
       * @throws IOException If errors occur while reading.
       */
-    public void readHeader(ReadableByteChannel channel) throws IOException
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void readHeader(ReadableByteChannel channel) throws IOException
     {
         // Read in chunks of 1K
         ByteBuffer in = ByteBuffer.allocateDirect(1024);
@@ -634,7 +636,7 @@ public class DbaseFileHeader
         int r = buffer.remaining();
         while ( (r-= out.write(buffer)) > 0) 
         {
-            ; // do nothing
+            // do nothing
         }
     }
   
@@ -687,11 +689,16 @@ public class DbaseFileHeader
     /** Class for holding the information assicated with a record.
       */
     private class DbaseField
-    {  
-        String fieldName;        // Field Name.
+    {          
+		String fieldName;        // Field Name.
         char fieldType;          // Field Type (C N L D or M).
         int fieldDataAddress;    // Field Data Address offset from the start of the record.
         int fieldLength;         // Length of the data in bytes.
         int decimalCount;        // Field decimal count in Binary, indicating where the decimal is.
+        
+        public DbaseField() 
+        {
+			// Do nothing.
+		}
     }
 }

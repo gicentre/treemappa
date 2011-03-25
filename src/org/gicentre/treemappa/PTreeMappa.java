@@ -1,6 +1,6 @@
 package org.gicentre.treemappa;
 
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
@@ -13,7 +13,7 @@ import processing.core.PImage;
 //********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd March, 2011.
+ *  @version 3.0, 25th March, 2011.
  */
 //  ******************************************************************************
 
@@ -70,15 +70,27 @@ public class PTreeMappa
 	
 	// ---------------------------------------- Methods ----------------------------------------
 	
-	/** Reads in CSV tree data from the Processing sketch's data folder. If you need to use
-	 *  other data formats or data from other locations, use TreeMappa instead.
+	
+	/** Reads in CSV tree data from the Processing sketch's data folder. If you need to read data
+	 *  from other locations, use TreeMappa's file reading methods instead.
 	 *  @param dataFileName Name of CSV file in the data folder representing the tree data.
 	 */
 	public void readData(String dataFileName)
 	{		
+		readData(dataFileName,"csv");
+	}
+	
+	/** Reads in tree data in the given format from the Processing sketch's data folder. If you 
+	 *  need to read data from other locations or need to control format options, use TreeMappa's
+	 *  file reading methods instead.
+	 *  @param dataFileName Name of file in the data folder representing the tree data.
+	 *  @param fileFormat Format of data file, can be 'csv', 'csvSpatial', 'csvCompact' or 'treeML;
+	 */
+	public void readData(String dataFileName, String fileFormat)
+	{		
 		// Set default file reading properties.
 		treeMappa.getConfig().setParameter(TreeMapProperties.TEXT_ONLY, "false");
-		treeMappa.getConfig().setParameter(TreeMapProperties.FILE_TYPE, "csv");
+		treeMappa.getConfig().setParameter(TreeMapProperties.FILE_TYPE, fileFormat);
 		treeMappa.getConfig().setParameter(TreeMapProperties.USE_LABELS, "true");
 		treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,parent.dataPath(dataFileName));
 		
@@ -141,17 +153,25 @@ public class PTreeMappa
 			}
 
 			// Fill leaf background.
-			Rectangle bounds = leaf.getBounds();
+			Rectangle2D bounds = leaf.getBounds();
+			
+			if ((bounds.getWidth() <=1) || (bounds.getHeight() <=1))
+			{	
+				// Do not display sub-pixel nodes.
+				continue;
+			}
+			
 			parent.fill(leaf.getColour().getRGB());
 			parent.stroke(tmPanel.getBorderColour().getRGB(),25);
-			parent.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+			parent.strokeWeight(0.1f);
+			parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
 
 			// Draw leaf label.
-			if (tmPanel.getShowLeafLabels() && bounds.width > 10)
+			if (tmPanel.getShowLeafLabels() && bounds.getWidth() > 1)
 			{
 				String[] lines = leaf.getLabel().split("\\\\n");				
 				parent.fill(tmPanel.getLeafTextColour().getRGB());
-				
+								
 				float maxWidth=0;
 				for (String line : lines)
 				{
@@ -162,18 +182,18 @@ public class PTreeMappa
 				float totalHeight = lines.length*lineHeight;
 
 				// Work out the scalings required to fit text both vertically and horizontally.        
-				float horizXScale = bounds.width / maxWidth;
-				float horizYScale = bounds.height / totalHeight;
-				float horizScale = horizXScale;
-				float vertXScale = bounds.width / totalHeight;
-				float vertYScale = bounds.height / maxWidth;
-				float vertScale = vertXScale;
+				double horizXScale = bounds.getWidth() / maxWidth;
+				double horizYScale = bounds.getHeight() / totalHeight;
+				double horizScale = horizXScale;
+				double vertXScale = bounds.getWidth() / totalHeight;
+				double vertYScale = bounds.getHeight() / maxWidth;
+				double vertScale = vertXScale;
 
 				horizScale = Math.min(horizXScale, horizYScale);
 				vertScale  = Math.min(vertXScale, vertYScale);
 
-				horizScale = (float)(horizScale*0.7 + (0.3*bounds.width*bounds.height) / tmPanel.getRootArea());
-				vertScale = (float)(vertScale*0.7 + (0.3*bounds.width*bounds.height) / tmPanel.getRootArea());
+				horizScale = (float)(horizScale*0.7 + (0.3*bounds.getWidth()*bounds.getHeight()) / tmPanel.getRootArea());
+				vertScale = (float)(vertScale*0.7 + (0.3*bounds.getWidth()*bounds.getHeight()) / tmPanel.getRootArea());
 
 				if (tmPanel.getMaxLeafText() > 0)
 				{
@@ -192,27 +212,27 @@ public class PTreeMappa
 				for (int i=0; i<lines.length; i++)
 				{
 					parent.pushMatrix();
-					float x=0,y=0;
+					double x=0,y=0;
 
 					// Only use vertical text if it increases text size by at least 20% and is allowed.
 					if ((tmPanel.getAllowVerticalLabels()) && (vertScale > horizScale*1.2))
 					{
 						// Rotate text about its centre (since this will produce a larger label)
-						float cx =  bounds.x + (bounds.width/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
-						float cy =  bounds.y + (bounds.height-parent.textWidth(lines[i])*vertScale)/2;	        		
+						double cx =  bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						double cy =  bounds.getY() + (bounds.getHeight()-parent.textWidth(lines[i])*vertScale)/2;	        		
 						
-						parent.translate(cx,cy);
+						parent.translate((float)cx,(float)cy);
 						parent.rotate(PConstants.HALF_PI);
-						parent.scale(vertScale,vertScale);
+						parent.scale((float)vertScale,(float)vertScale);
 					}
 					else
 					{
 						// Use horizontal text.
-						x = bounds.x + (bounds.width - horizScale*parent.textWidth(lines[i]))/2;
-						y = bounds.y + (bounds.height/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						x = bounds.getX() + (bounds.getWidth() - horizScale*parent.textWidth(lines[i]))/2;
+						y = bounds.getY() + (bounds.getHeight()/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
 
-						parent.translate(x,y);
-						parent.scale(horizScale,horizScale);
+						parent.translate((float)x,(float)y);
+						parent.scale((float)horizScale,(float)horizScale);
 					}
 
 					parent.text(lines[i],0,0);
@@ -229,11 +249,11 @@ public class PTreeMappa
 				continue;
 			}
 
-			Rectangle bounds = branch.getBounds();
+			Rectangle2D bounds = branch.getBounds();
 			int level = branch.getLevel();
 			
 			// Draw branch label.
-			if ((tmPanel.getShowBranchLabels()) && bounds.width > 10)
+			if ((tmPanel.getShowBranchLabels()) && bounds.getWidth() > 1)
 			{
 				String[] lines = branch.getLabel().split("\\\\n");
 				
@@ -250,18 +270,18 @@ public class PTreeMappa
 				float totalHeight = lines.length*lineHeight;
 
 				// Work out the scalings required to fit text both vertically and horizontally.        
-				float horizXScale = bounds.width / maxWidth;
-				float horizYScale = bounds.height / totalHeight;
-				float horizScale = horizXScale;
-				float vertXScale = bounds.width / totalHeight;
-				float vertYScale = bounds.height / maxWidth;
-				float vertScale = vertXScale;
+				double horizXScale = bounds.getWidth() / maxWidth;
+				double horizYScale = bounds.getHeight() / totalHeight;
+				double horizScale = horizXScale;
+				double vertXScale = bounds.getWidth() / totalHeight;
+				double vertYScale = bounds.getHeight() / maxWidth;
+				double vertScale = vertXScale;
 
 				horizScale = Math.min(horizXScale, horizYScale);
 				vertScale  = Math.min(vertXScale, vertYScale);
 
-				horizScale = (float)(horizScale*0.7 + (0.3*bounds.width*bounds.height) / tmPanel.getRootArea());
-				vertScale = (float)(vertScale*0.7 + (0.3*bounds.width*bounds.height) / tmPanel.getRootArea());
+				horizScale = (float)(horizScale*0.7 + (0.3*bounds.getWidth()*bounds.getHeight()) / tmPanel.getRootArea());
+				vertScale = (float)(vertScale*0.7 + (0.3*bounds.getWidth()*bounds.getHeight()) / tmPanel.getRootArea());
 
 				if (tmPanel.getMaxBranchTexts()[level-1] > 0)
 				{
@@ -279,28 +299,28 @@ public class PTreeMappa
 
 				for (int i=0; i<lines.length; i++)
 				{     	
-					float x=0,y=0;
+					double x=0,y=0;
 					parent.pushMatrix();
 					
 					// Only use vertical text if it increases text size by at least 20% and is allowed.
 					if ((tmPanel.getAllowVerticalLabels()) && (vertScale > horizScale*1.2))
 					{
 						// Rotate text about its centre (since this will produce a larger label)
-						float cx =  bounds.x + (bounds.width/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
-						float cy =  bounds.y + (bounds.height-(parent.textWidth(lines[i]))*vertScale)/2;
+						double cx =  bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						double cy =  bounds.getY() + (bounds.getHeight()-(parent.textWidth(lines[i]))*vertScale)/2;
 
-						parent.translate(cx,cy);
+						parent.translate((float)cx,(float)cy);
 						parent.rotate(PConstants.HALF_PI);
-						parent.scale(vertScale,vertScale);
+						parent.scale((float)vertScale,(float)vertScale);
 					}
 					else
 					{
 						// Use horizontal text.
-						x = bounds.x + (bounds.width - horizScale*parent.textWidth(lines[i]))/2;
-						y = bounds.y + (bounds.height/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						x = bounds.getX() + (bounds.getWidth() - horizScale*parent.textWidth(lines[i]))/2;
+						y = bounds.getY() + (bounds.getHeight()/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
 						
-						parent.translate(x, y);
-						parent.scale(horizScale,horizScale);
+						parent.translate((float)x, (float)y);
+						parent.scale((float)horizScale,(float)horizScale);
 					}
 					parent.text(lines[i],0,0);
 					parent.popMatrix();
@@ -309,7 +329,8 @@ public class PTreeMappa
 			float opacity = 255*Math.max(0.1f,(tmPanel.getMaxDepth()-level)/(float)tmPanel.getMaxDepth());
 			parent.stroke(tmPanel.getBorderColour().getRGB(),opacity);
 			parent.noFill();
-			parent.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+			parent.strokeWeight((float)tmPanel.getBorders()[level]+0.01f);		// Ensures weight is greater than 0.
+			parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
 		}
 
 		// Draw displacement vectors if requested.
@@ -320,14 +341,14 @@ public class PTreeMappa
 			int level = branch.getLevel();
 			if (tmPanel.getShowBranchDisplacements()[level-1])
 			{
-				Rectangle bounds = branch.getBounds();
+				Rectangle2D bounds = branch.getBounds();
 				parent.stroke(tmPanel.getBranchTextColours()[level].getRGB());
 
 				// Draw displacement vector
-				if ((branch.getGeoBounds() != null) && (bounds.width>0) && (bounds.height>0))
+				if ((branch.getGeoBounds() != null) && (bounds.getWidth()>0) && (bounds.getHeight()>0))
 				{
-					drawCurve(bounds.x+bounds.width/2f, bounds.y+bounds.height/2f,
-							  (float)branch.getGeoBounds().getX(),(float)branch.getGeoBounds().getY());
+					drawCurve(bounds.getX()+bounds.getWidth()/2.0, bounds.getY()+bounds.getHeight()/2.0,
+							  branch.getGeoBounds().getX(),branch.getGeoBounds().getY());
 				}
 			}
 		}
@@ -335,14 +356,14 @@ public class PTreeMappa
 		{
 			for (NodePanel leaf : tmPanel.getLeaves())
 			{
-				Rectangle bounds = leaf.getBounds();
+				Rectangle2D bounds = leaf.getBounds();
 				
 				// Draw displacement vector
-				if ((leaf.getGeoBounds() != null) && (bounds.width>0) && (bounds.height>0))
+				if ((leaf.getGeoBounds() != null) && (bounds.getWidth()>0) && (bounds.getHeight()>0))
 				{
 					parent.stroke(tmPanel.getLeafTextColour().getRGB());
-					drawCurve(bounds.x+bounds.width/2f, bounds.y+bounds.height/2f,
-							  (float)leaf.getGeoBounds().getX(),(float)leaf.getGeoBounds().getY());
+					drawCurve(bounds.getX()+bounds.getWidth()/2.0, bounds.getY()+bounds.getHeight()/2.0,
+							  leaf.getGeoBounds().getX(),leaf.getGeoBounds().getY());
 				}
 			}
 		}
@@ -389,13 +410,13 @@ public class PTreeMappa
 	 *  Wang, D., Dang, N., Aris, A. and Plaisant, C. 'Overlaying Graph Links on TreeMaps',
 	 *  Information Visualisation Poster Compendium, pp.82-83
 	 */
-	private void drawCurve(float x1,float y1, float x2, float y2)
+	private void drawCurve(double x1,double y1, double x2, double y2)
 	{  
-	  float x = (x1-x2)/4f;
-	  float y = (y1-y2)/4f;
+	  double x = (x1-x2)/4;
+	  double y = (y1-y2)/4;
 
-	  float cx = (float)(x2 + x*Math.cos(TreeMapPanel.CURVE_ANGLE) - y*Math.sin(TreeMapPanel.CURVE_ANGLE));
-	  float cy = (float)(y2 + y*Math.cos(TreeMapPanel.CURVE_ANGLE) + x*Math.sin(TreeMapPanel.CURVE_ANGLE));
-	  parent.bezier(x1,y1,cx,cy,x2,y2,x2,y2);
+	  double cx = (x2 + x*Math.cos(TreeMapPanel.CURVE_ANGLE) - y*Math.sin(TreeMapPanel.CURVE_ANGLE));
+	  double cy = (y2 + y*Math.cos(TreeMapPanel.CURVE_ANGLE) + x*Math.sin(TreeMapPanel.CURVE_ANGLE));
+	  parent.bezier((float)x1,(float)y1,(float)cx,(float)cy,(float)x2,(float)y2,(float)x2,(float)y2);
 	}
 }

@@ -12,7 +12,7 @@ import javax.swing.tree.*;
  *  the size of the node, a numeric value representing the colour of the node and the sum of numeric
  *  size values below it in the tree.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd March, 2011
+ *  @version 3.0, 25th March, 2011
  */ 
 // ****************************************************************************************************
 
@@ -41,7 +41,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	private double accumSize;			// Accumulated size value of this node and its children.
 	private double avOrder;				// Accumulated average order value of this node and its children.
 	private Point2D location;			// Location of node (if spatially referenced).
-	private Rectangle2D rect;			// Tree map rectangle coordinates.
+	private Rectangle2D.Double rect;	// Tree map rectangle coordinates.
 	private int level;					// Node depth (root at 0)
 	private int maxDepth;				// Maximum depth of this node's children (root is depth 0)
 	private int numLeaves;				// Number of leaves including this one and all its children.
@@ -60,8 +60,6 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 
 	private static final DecimalFormat valueFormatter = new DecimalFormat("#0.######");
 	private static final DecimalFormat coordFormatter = new DecimalFormat("#0.#");
-
-
 
 	// --------------------------- Constructors ----------------------------
 
@@ -530,7 +528,7 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	 *  properties that might affect geometry.
 	 *  @return Rectangle representing the tree-map coordinates of this node.
 	 */
-	public Rectangle2D getRectangle()
+	public Rectangle2D.Double getRectangle()
 	{
 		//System.err.println("Rect is "+rect+" in "+this);
 		return rect;

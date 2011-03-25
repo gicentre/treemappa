@@ -43,11 +43,10 @@ import javax.swing.JPanel;
 
 import org.gicentre.utils.colour.ColourTable;
 
-
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd March, 2011.
+ *  @version 3.0, 25th March, 2011.
  */
 // ***************************************************************************************************
 
@@ -384,7 +383,7 @@ public class TreeMapPanel extends JPanel
 			}
 
 			// Fill leaf background.
-			Rectangle bounds = leaf.getBounds();		
+			Rectangle bounds = leaf.getBounds().getBounds();		
 			g.setColor(leaf.getColour());
 			g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
@@ -493,8 +492,8 @@ public class TreeMapPanel extends JPanel
 				// Do not display dummy nodes.
 				continue;
 			}
-
-			Rectangle bounds = branch.getBounds();
+			
+			Rectangle bounds = branch.getBounds().getBounds();		
 			int level = branch.getLevel();
 			g.setFont(branchFonts[level-1]);
 
@@ -601,7 +600,7 @@ public class TreeMapPanel extends JPanel
 			int level = branch.getLevel();
 			if (showBranchDisplacements[level-1])
 			{
-				Rectangle bounds = branch.getBounds();
+				Rectangle bounds = branch.getBounds().getBounds();
 
 				// Draw displacement vector
 				if ((branch.getGeoBounds() != null) && (bounds.width>0) && (bounds.height>0))
@@ -618,7 +617,8 @@ public class TreeMapPanel extends JPanel
 		{
 			for (NodePanel leaf : leaves)
 			{
-				Rectangle bounds = leaf.getBounds();
+				Rectangle bounds = leaf.getBounds().getBounds();		
+		
 				// Draw displacement vector
 				if ((leaf.getGeoBounds() != null) && (bounds.width>0) && (bounds.height>0))
 				{
@@ -824,7 +824,7 @@ public class TreeMapPanel extends JPanel
 	 */
 	public boolean setBorderColour(int borderColour)
 	{
-		return setBorderColour(new Color(borderColour));
+		return setBorderColour(new Color(borderColour,true));
 	}
 	
 	/** Sets the colour used to display treemap borders. Note that the treemap will not use this new 
@@ -835,7 +835,7 @@ public class TreeMapPanel extends JPanel
 	public boolean setBorderColour(Color borderColour)
 	{
 		this.borderColour = borderColour;
-		treeMappa.getConfig().setParameter("borderColour", ColourTable.getHexString(borderColour.getRGB()));
+		treeMappa.getConfig().setParameter("borderColour", getHexString(borderColour.getRGB()));
 		return true;
 	}
 	
@@ -847,7 +847,7 @@ public class TreeMapPanel extends JPanel
 	 */
 	public boolean setLeafTextColour(int textColour)
 	{
-		return setLeafTextColour(new Color(textColour));
+		return setLeafTextColour(new Color(textColour,true));
 	}
 
 	/** Sets the colour used to display leaf text. Note that the treemap will not use this new 
@@ -858,13 +858,7 @@ public class TreeMapPanel extends JPanel
 	public boolean setLeafTextColour(Color textColour)
 	{
 		this.leafTextColour = textColour;
-		String hexColour = ColourTable.getHexString(textColour.getRGB());
-		if (leafTextColour.getAlpha() < 255)
-		{
-			hexColour = hexColour+paddedHex(textColour.getAlpha());
-		}
-
-		treeMappa.getConfig().setParameter("leafTextColour", hexColour);
+		treeMappa.getConfig().setParameter("leafTextColour", getHexString(textColour.getRGB()));
 		return true;
 	}
 
@@ -876,7 +870,7 @@ public class TreeMapPanel extends JPanel
 	 */
 	public boolean setBranchTextColours(int textColour)
 	{
-		return setBranchTextColours(new Color(textColour));
+		return setBranchTextColours(new Color(textColour,true));
 	}
 	
 	/** Sets the colour used to display text at all branch levels. Note that the treemap will 
@@ -890,13 +884,8 @@ public class TreeMapPanel extends JPanel
 		{
 			branchTextColours[i] = textColour;
 		}
-		String hexColour = ColourTable.getHexString(textColour.getRGB());
-		if (textColour.getAlpha() < 255)
-		{
-			hexColour = hexColour+paddedHex(textColour.getAlpha());
-		}
-
-		treeMappa.getConfig().setParameter("textColour", hexColour);
+		
+		treeMappa.getConfig().setParameter("textColour", getHexString(textColour.getRGB()));
 		return true;
 	}
 
@@ -909,7 +898,7 @@ public class TreeMapPanel extends JPanel
 	 */
 	public boolean setBranchTextColour(int level, int textColour)
 	{
-		return setBranchTextColour(level, new Color(textColour));
+		return setBranchTextColour(level, new Color(textColour,true));
 	}
 	
 	/** Sets the colour used to display branch text at the given level. Note that the treemap will 
@@ -926,13 +915,7 @@ public class TreeMapPanel extends JPanel
 			return false;
 		}
 		branchTextColours[level] = textColour;
-		String hexColour = ColourTable.getHexString(textColour.getRGB());
-		if (textColour.getAlpha() < 255)
-		{
-			hexColour = hexColour+paddedHex(textColour.getAlpha());
-		}
-
-		treeMappa.getConfig().setParameter("textColour"+level, hexColour);
+		treeMappa.getConfig().setParameter("textColour"+level, getHexString(textColour.getRGB()));
 		return true;
 	}
 
@@ -1504,6 +1487,41 @@ public class TreeMapPanel extends JPanel
 	{
 		return new Color(cTable.findColour(colourValue),true);
 	}
+	
+	/** Converts a given colour into its HTML-like hex string in the form <code>#rrggbb</code> or
+     *  <code>rrggbbaa</code> if the colour has a non-opaque alpha value.
+     *  @param colour Colour to convert.
+     *  @return HTML hex string representing colour.
+     */  
+    private static String getHexString(int colour)
+    {
+    	
+        // Colour masks.
+        final int ALF = 255 << 24;
+        final int RED = 255 << 16;
+        final int GRN = 255 <<  8;
+        final int BLU = 255;
+        
+        int red   = (colour & RED) >> 16;
+        int green = (colour & GRN) >>  8;
+        int blue  = (colour & BLU);
+        
+        int alf   = (colour & ALF) >> 24;
+        // Convert to unsigned integer.
+        if (alf < 0) 
+        {
+            alf +=256;
+        }
+        
+        // The #rrggbbaa version.
+        if (alf <255)
+        {
+        	return new String("#"+paddedHex(red) + paddedHex(green) + paddedHex(blue)+ paddedHex(alf));
+        }
+        
+        // The #rrggbb version.
+        return new String("#"+paddedHex(red) + paddedHex(green) + paddedHex(blue));            
+    }
 
 	/** Creates a curved arrow between the two given points. Greater angular change is at the source 
 	 * of the arrow (p1), in order to provide a visual indication of direction. See 
@@ -1655,7 +1673,7 @@ public class TreeMapPanel extends JPanel
 			for (NodePanel leaf : leaves)
 			{
 				// Fill leaf background.
-				Rectangle bounds = leaf.getBounds();
+				Rectangle bounds = leaf.getBounds().getBounds();
 				writeLine("<polygon style=\"fill:"+leaf.getHexColour()+";\" points=\""+(multiplier*bounds.x)+","+(multiplier*bounds.y)+" "+
 						(multiplier*(bounds.x+bounds.width))+","+(multiplier*bounds.y)+" "+
 						(multiplier*(bounds.x+bounds.width))+","+(multiplier*(bounds.y+bounds.height))+" "+
@@ -1666,7 +1684,7 @@ public class TreeMapPanel extends JPanel
 			for (NodePanel branch : branches)
 			{
 				// Fill branch background.
-				Rectangle bounds = branch.getBounds();				
+				Rectangle bounds = branch.getBounds().getBounds();				
 				writeLine("<polyline points=\""+(multiplier*bounds.x)+","+(multiplier*bounds.y)+" "+
 						(multiplier*(bounds.x+bounds.width))+","+(multiplier*bounds.y)+" "+
 						(multiplier*(bounds.x+bounds.width))+","+(multiplier*(bounds.y+bounds.height))+" "+
@@ -1684,7 +1702,7 @@ public class TreeMapPanel extends JPanel
 				for (NodePanel leaf : leaves)
 				{
 					// Draw leaf label.
-					Rectangle bounds = leaf.getBounds();
+					Rectangle bounds = leaf.getBounds().getBounds();
 
 					if (bounds.width*bounds.height > 0)
 					{
@@ -1773,7 +1791,7 @@ public class TreeMapPanel extends JPanel
 				for (NodePanel branch : branches)
 				{
 					// Draw branch label.
-					Rectangle bounds = branch.getBounds();
+					Rectangle bounds = branch.getBounds().getBounds();
 
 					if (showBranchLabels && bounds.width > 0)
 					{
@@ -1892,7 +1910,7 @@ public class TreeMapPanel extends JPanel
 				int level = branch.getLevel();
 				if (showBranchDisplacements[level-1])
 				{
-					Rectangle bounds = branch.getBounds();
+					Rectangle bounds = branch.getBounds().getBounds();
 					// Draw displacement vector
 					if (branch.getGeoBounds() != null)
 					{
@@ -1909,7 +1927,7 @@ public class TreeMapPanel extends JPanel
 
 				for (NodePanel leaf : leaves)
 				{
-					Rectangle bounds = leaf.getBounds();
+					Rectangle bounds = leaf.getBounds().getBounds();
 					// Draw displacement vector
 					if (leaf.getGeoBounds() != null)
 					{
