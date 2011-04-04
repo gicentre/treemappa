@@ -406,8 +406,6 @@ public class TreeMapProperties
 		return true;
 	}
 
-	
-	
 	/** Loads a set of treemappa configuration options from an XML file with the given name.
 	 *  The options all have defaults so the configuration file need only contain non-default
 	 *  options.

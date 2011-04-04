@@ -5,15 +5,18 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
 import org.gicentre.utils.colour.ColourTable;
+import org.gicentre.utils.io.DOMProcessor;
+import org.w3c.dom.Node;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
+import processing.xml.XMLElement;
 
 //********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th March, 2011.
+ *  @version 3.0.1, 4th April, 2011.
  */
 //  ******************************************************************************
 
@@ -35,7 +38,7 @@ public class PTreeMappa
 {
 	// ------------------------------------ Object variables ------------------------------------
 	
-	private PApplet parent;				// Processing sketch that will use the treemap.
+	PApplet parent;						// Processing sketch that will use the treemap.
 	private TreeMappa treeMappa;		// TreeMappa object doing the treemapping stuff.
 	private TreeMapPanel tmPanel;		// Panel for displaying treemaps.
 	
@@ -92,13 +95,14 @@ public class PTreeMappa
 		treeMappa.getConfig().setParameter(TreeMapProperties.TEXT_ONLY, "false");
 		treeMappa.getConfig().setParameter(TreeMapProperties.FILE_TYPE, fileFormat);
 		treeMappa.getConfig().setParameter(TreeMapProperties.USE_LABELS, "true");
-		treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,parent.dataPath(dataFileName));
+		//treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,parent.dataPath(dataFileName));
+		treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,dataFileName);
 		
 		// Layout assumed to be size of the parent sketch.
 		treeMappa.getConfig().setParameter(TreeMapProperties.WIDTH, Integer.toString(parent.width));
 		treeMappa.getConfig().setParameter(TreeMapProperties.HEIGHT, Integer.toString(parent.height));
 		
-		treeMappa.readData();
+		treeMappa.readData(this);
 		treeMappa.buildTreeMap();
 						
 		// Use current fill setting if no colour table supplied.
@@ -405,6 +409,48 @@ public class PTreeMappa
 	
 	// ------------------------------------ Private methods ------------------------------------
 	
+	/** Creates a DOM from the inFile stored in TreeMappa's inFile property. This method uses the applet-safe
+	 *  Processing class XMLElement to read file.
+	 */
+	DOMProcessor createDOM()
+	{
+		XMLElement root = new XMLElement(parent,treeMappa.getConfig().getInFileName());
+		DOMProcessor dom = new DOMProcessor();
+		dom.addElement(root.getName());
+		copyXMLContents(root,dom.getElements(root.getName())[0],dom);
+		return dom;
+	}
+	
+	/** Recursively copies the contents of the XML element to a dom. Will search for child elements and
+	 *  copy these too.
+	 * @param xmle XMLElement from which to copy.
+	 * @param domNode Destination DOM node into which attributes and values copied.
+	 * @param dom Processor that handles the DOM creation.
+	 */
+	private void copyXMLContents(XMLElement xmle, Node domNode, DOMProcessor dom)
+	{
+		// Copy node attributes
+		String[] attributes = xmle.listAttributes();
+		for (String attribute : attributes)
+		{
+			dom.addAttribute(attribute,xmle.getString(attribute), domNode);
+		}
+		
+		// Copy node text if it exists.
+		String text = xmle.getContent();
+		if (text != null)
+		{
+			dom.addText(xmle.getContent(), domNode);
+		}
+		
+		// Copy node's children
+		for (XMLElement child : xmle.getChildren())
+		{
+			Node domChild = dom.addElement(child.getName(),domNode);
+			copyXMLContents(child,domChild,dom);
+		}
+	}
+		
 	/** Draws an asymmetric curve from (x1,y1) to (x2,y2). Greater angular change is at the source 
 	 *  of the arrow (x1,y1), in order to provide a visual indication of direction. See Fekete, J-D,
 	 *  Wang, D., Dang, N., Aris, A. and Plaisant, C. 'Overlaying Graph Links on TreeMaps',

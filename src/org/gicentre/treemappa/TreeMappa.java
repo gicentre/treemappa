@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd March, 2011.
+ *  @version 3.0.1, 4th April, 2011.
  */
 //  **************************************************************************
 
@@ -148,6 +148,76 @@ public class TreeMappa
 		else if (fileType.equalsIgnoreCase("csvspatial"))
 		{
 			if (readCSV(inFileName,useLabels,CSV_SPATIAL) == false)
+			{
+				System.err.println("Problem reading spatial CSV file.");
+				return false;
+			}
+		}
+		else
+		{
+			System.err.println("Unknown file type: '"+fileType+"'");
+			return false;
+		}
+
+		// No problems if we get this far.
+		needsRebuild = true;
+		return true;
+	}
+	
+	/** Reads in the data from the file identified in the given PTreeMappa object. This version is used
+	 *  when reading data from a Processing applet and avoids security exceptions by assuming data are
+	 *  stored in the Processing applet location.
+	 *  @param pTreeMappa Processing interface to treemappa that handles files.
+	 *  @return True if data read without problems.
+	 */
+	public boolean readData(PTreeMappa pTreeMappa)
+	{
+		boolean textOnly = props.getTextOnly();
+		String fileType = props.getFileType();
+		boolean useLabels = props.getUseLabels();
+		
+		BufferedReader bReader = pTreeMappa.parent.createReader(props.getInFileName());
+
+		if (bReader == null)
+		{
+			System.err.println("No file specified from which to read tree data.");
+			return false;
+		}
+
+		// Read in the external tree data.
+		if ((textOnly == false) && (isVerbose))
+		{
+			System.out.println("Reading data.");
+		}
+
+		if  (fileType.equalsIgnoreCase("treeml"))
+		{
+			if (readTreeML(pTreeMappa.createDOM(),props.getInFileName(),useLabels) == false)
+			{
+				System.err.println("Problem reading treeML file.");
+				return false;
+			}
+			return false;
+		}
+		else if (fileType.equalsIgnoreCase("csv"))
+		{
+			if (readCSV(bReader,useLabels,CSV) == false)
+			{
+				System.err.println("Problem reading CSV file.");
+				return false;
+			}
+		}
+		else if (fileType.equalsIgnoreCase("csvcompact"))
+		{
+			if (readCSV(bReader,useLabels,CSV_COMPACT) == false)
+			{
+				System.err.println("Problem reading compact CSV file.");
+				return false;
+			}
+		}
+		else if (fileType.equalsIgnoreCase("csvspatial"))
+		{
+			if (readCSV(bReader,useLabels,CSV_SPATIAL) == false)
 			{
 				System.err.println("Problem reading spatial CSV file.");
 				return false;
@@ -1134,15 +1204,25 @@ public class TreeMappa
 			computeAreas(child);
 		}
 	}
-
+	
 	/** Creates a tree from the given TreeML file.
-	 *  @param inFileName Name of file containing the treeML data.
+	 *  @param fileName Name of file containing the treeML data.
 	 *  @return True if file read without problems.
 	 */
-	private boolean readTreeML(String inFileName, boolean useLabels)
+	private boolean readTreeML(String fileName, boolean useLabels)
 	{
-		dom = new DOMProcessor(inFileName);
-		String fullFileName = new File(inFileName).getAbsolutePath();
+		return readTreeML(new DOMProcessor(fileName), new File(fileName).getAbsolutePath(),useLabels);
+	}
+	
+	/** Creates a tree from the given Document Object Model.
+	 *  @param treeDOM DOM representing tree hierarchy.
+	 *  @param fullFileName Full path of file containing the treeML data (used for error reporting).
+	 *  @return True if file read without problems.
+	 */
+	private boolean readTreeML(DOMProcessor treeDOM, String fullFileName, boolean useLabels)
+	{
+		this.dom = treeDOM;
+		
 		if (dom.isEmpty())
 		{
 			System.err.println("No XML content found in TreeML file "+fullFileName);
@@ -1176,7 +1256,7 @@ public class TreeMappa
 		return true; 
 	}
 
-
+	
 	/** Creates a tree from the given CSV file. The file can be 'csvCompact' in which case, node order is determined
 	 * by the 'size' attribute and then colour attribute if size values are equal; 'csv' in which case a separate
 	 * column indicates node order; or 'csvSpatial' where spatial locations are given to all levels of the hierarchy
@@ -1201,15 +1281,52 @@ public class TreeMappa
 	 */
 	private boolean readCSV(String inFileName, boolean useLabels, int flavour)
 	{
+		File inFile = new File(inFileName);
+		
 		try
 		{
-			File inFile = new File(inFileName);
 			if (inFile.canRead() == false)
 			{
 				System.err.println("Cannot find file "+inFile.getCanonicalPath());
 				return false;
 			}
-			BufferedReader bInFile = new BufferedReader(new FileReader(inFileName));
+			return readCSV(new BufferedReader(new FileReader(inFileName)),useLabels,flavour);
+		}
+		catch (IOException e)
+		{
+			System.err.println("Problem reading CSV file: "+e);
+			return false;
+		}
+	}
+
+	/** Creates a tree from the given CSV file. This version requires a buffered reader pointing to the CSV file and so
+	 *  is compatible with Processing if the reader was created with <code>createReader()</code>. The file can be 
+	 *  'csvCompact' in which case, node order is determined by the 'size' attribute and then colour attribute if size 
+	 *  values are equal; 'csv' in which case a separate column indicates node order; or 'csvSpatial' where spatial 
+	 *  locations are given to all levels of the hierarchy
+	 * <br /><br /> 
+	 * For 'csvCompact', each row of the CSV file should be in the following format:<br />
+	 * <code>"Leaf name", size, colour, x, y, node, [nodeChild, nodeGrandchild, nodeGreatGrandchild...] </code><br />
+	 * For 'csv', each row of the CSV file should be in the following format:<br />
+	 * <code>"Leaf name", order, size, colour, x, y, node, [nodeChild, nodeGrandchild, nodeGreatGrandchild...] </code><br />
+	 * <br /><br />
+	 *  For 'csvSpatial', each row of the CSV file should be in the following format:<br />
+	 * <code>"Leaf name", order, size, colour, leafX, leafY, node, nodex, nodey [nodeChild, nodeChildX,nodeChildY, nodeGrandchild, nodeGrandchildX, nodeGrandchildY, nodeGreatGrandchild...] </code><br />
+	 * <br /><br />
+	 * where <code>size</code> is a numeric value that will be used to map the size of each leaf, <code>order</code> is a 
+	 * numeric value that is used to determine node order (sorted from lowest to highest), <code>colour</code> is a numeric
+	 * value that relates to a colour lookup or a raw 24 bit integer colour, <code>x,y</code> and variants represent the location of
+	 * the leaf (CSV, CSVCompact) or branch (CSVSpatial), and the list of nodes represents the names of the leaf's parents. 
+	 * Must include at least one node (root) in the list.
+	 * @param bReader Buffered reader pointing to the file containing the CSV data.
+	 * @param useLabels Node labels used to define hierarchy if true. Otherwise tree structure only defined by level0, level1, level2 etc.
+	 * @param flavour Type of CSV format. Can be one of <code>CSV</code>, <code>CSV_COMPACT</code> or <code>CSV_SPATIAL</code>.
+	 * @return True if file read without problems.
+	 */
+	private boolean readCSV(BufferedReader bReader, boolean useLabels, int flavour)
+	{
+		try
+		{
 			String[] tokens;
 			root = new TreeMapNode("root",0,null,null,null);
 			tree = new DefaultTreeModel(root);
@@ -1234,11 +1351,11 @@ public class TreeMappa
 				itemsPerBranch=3;
 			}
 			//int ln = 0;	        	        
-			while (bInFile.ready())
+			while (bReader.ready())
 			{
 				//if (++ln%500 == 0) System.err.println(ln);
 
-				String inputLine = bInFile.readLine();
+				String inputLine = bReader.readLine();
 				int leafIndex = 0;
 				int lastBranchIndex;
 
@@ -1406,7 +1523,7 @@ public class TreeMappa
 				node.setLabel(tokens[0]);
 				parent.add(node);
 			}
-			bInFile.close();	    	
+			bReader.close();	    	
 		}
 		catch (IOException e)
 		{
