@@ -78,6 +78,8 @@ public class TreeMappa
 	private double targetAR = 1f;					// TODO: Replace this with an AR stored in node.
 
 	private TreeMapProperties props;				// Treemap configuration properties.
+	
+	private boolean allowLeafBorders=false;
 
 	// ------------------------- Constructor ----------------------------
 
@@ -696,6 +698,14 @@ public class TreeMappa
 			return true;
 		}
 		return false;
+	}
+	
+	/**Allows leaf nodes to have borders
+	 * False by default.
+	 * @param allowLeafBorders
+	 */
+	public void setAllowLeafBorders(boolean allowLeafBorders){
+		this.allowLeafBorders=allowLeafBorders;
 	}
 
 	/** Sets the border size of the treemap. Note that since this operation requires the recalculation
@@ -1585,7 +1595,10 @@ public class TreeMappa
 		// Recursively process descendants.
 		for (TreeMapNode child : parent.getChildren())
 		{          
-			if (child.getChildCount() > 0 && getArea(child) > 0 ) 
+			if (
+					(!allowLeafBorders && child.getChildCount() > 0 && getArea(child) > 0 ) ||
+					(allowLeafBorders && getArea(child) > 0 )
+			   )
 			{
 				updateArea(child,rect);
 				Rectangle2D childRect = child.getRectangle();
