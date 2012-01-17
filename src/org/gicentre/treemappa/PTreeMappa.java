@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
+import org.gicentre.treemappa.gui.Drawable;
 import org.gicentre.utils.colour.ColourTable;
 import org.gicentre.utils.io.DOMProcessor;
 import org.w3c.dom.Node;
@@ -16,7 +17,7 @@ import processing.xml.XMLElement;
 //********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0.1, 4th April, 2011.
+ *  @version 3.1, 17th January, 2012.
  */
 //  ******************************************************************************
 
@@ -41,6 +42,7 @@ public class PTreeMappa
 	PApplet parent;						// Processing sketch that will use the treemap.
 	private TreeMappa treeMappa;		// TreeMappa object doing the treemapping stuff.
 	private TreeMapPanel tmPanel;		// Panel for displaying treemaps.
+	private Drawable renderer;		    // Alternative renderer for sketchy graphics and other styles.
 	
 	// -------------------------------------- Constructors --------------------------------------
 	
@@ -166,9 +168,38 @@ public class PTreeMappa
 			}
 			
 			parent.fill(leaf.getColour().getRGB());
-			parent.stroke(tmPanel.getBorderColour().getRGB(),25);
-			parent.strokeWeight(0.1f);
-			parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+				
+			if (tmPanel.getShowLeafBorders())
+			{
+				parent.stroke(tmPanel.getLeafBorderColour().getRGB());	
+				
+				float borderWeight = tmPanel.getLeafBorderWeight();
+				if (borderWeight < 0)
+				{
+					// Negative weights are given a thin line.
+					borderWeight = 0.1f;
+				}
+				
+				if (borderWeight > 0)
+				{
+					parent.strokeWeight(borderWeight);
+				}
+			}
+			else
+			{
+				// For backward compatibility, non-border rendering is with a thin, pale border.
+				parent.strokeWeight(0.1f);
+				parent.stroke(tmPanel.getBorderColour().getRGB(),25);
+			}
+			
+			if (renderer == null)
+			{
+				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+			}
+			else
+			{
+				renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+			}
 
 			// Draw leaf label.
 			if (tmPanel.getShowLeafLabels() && bounds.getWidth() > 1)
@@ -241,7 +272,7 @@ public class PTreeMappa
 
 					parent.text(lines[i],0,0);
 					parent.popMatrix();
-				}
+				}				
 			}
 		}
 
@@ -333,8 +364,26 @@ public class PTreeMappa
 			float opacity = 255*Math.max(0.1f,(tmPanel.getMaxDepth()-level)/(float)tmPanel.getMaxDepth());
 			parent.stroke(tmPanel.getBorderColour().getRGB(),opacity);
 			parent.noFill();
-			parent.strokeWeight((float)tmPanel.getBorders()[level]+0.01f);		// Ensures weight is greater than 0.
-			parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+			
+			float borderWeight = tmPanel.getBorderWeights()[level];
+			if (borderWeight < 0)
+			{
+				borderWeight = 1;
+			}
+			
+			if (borderWeight > 0)
+			{
+				parent.strokeWeight(borderWeight);	
+
+				if (renderer == null)
+				{
+					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+				}
+				else
+				{
+					renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+				}
+			}
 		}
 
 		// Draw displacement vectors if requested.
@@ -386,7 +435,16 @@ public class PTreeMappa
 	{
 		tmPanel.setColourTable(ColourTable.readFile(parent.dataPath(cTableFileName)));
 	}
-		
+	
+	/** Sets the renderer to be used for drawing treemaps. This need only be set if some non-default
+	 *  rendering is required (such as the sketchy rendering produced by the Handy library).
+	 *  @param renderer New renderer to use or null if default rendering is to be used.
+	 */
+	public void setRenderer(Drawable renderer)
+	{
+		this.renderer = renderer;
+	}
+
 	// ------------------------------------ Accessor methods ------------------------------------
 	
 	/** Provides the TreeMappa object used to build and display treemaps. This object can be used

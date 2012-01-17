@@ -14,7 +14,7 @@ import java.util.Properties;
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd March, 2011.
+ *  @version 3.1, 17th January, 2012.
  */
 // ********************************************************************************************************
 
@@ -29,6 +29,7 @@ public class TreeMapProperties
 	static final String ALLOW_VERTICAL 		= "allowVerticalLabels";
 	static final String BORDER				= "border";
 	static final String BORDER_COLOUR		= "borderColour";
+	static final String BORDER_WEIGHT		= "borderWeight";
 	static final String COLOUR_TABLE		= "cTable";
 	static final String FILE_TYPE			= "type";
 	static final String HEIGHT				= "height";
@@ -37,6 +38,8 @@ public class TreeMapProperties
 	static final String LABEL_BRANCHES		= "labelBranches";
 	static final String LABEL_LEAVES		= "labelLeaves";
 	static final String LAYOUT	 			= "layout";
+	static final String LEAF_BORDER_COLOUR	= "leafBorderColour";
+	static final String LEAF_BORDER_WEIGHT	= "leafBorderWeight";
 	static final String LEAF_TEXT_COLOUR	= "leafTextColour";
 	static final String LEAF_TEXT_FONT		= "leafTextFont";
 	static final String LEAF_VECTOR_WIDTH	= "leafVectorWidth";
@@ -49,6 +52,7 @@ public class TreeMapProperties
 	static final String SEED	 			= "seed";
 	static final String SHOW_ARROW_HEAD		= "showArrowHead";
 	static final String SHOW_BRANCH_DISP	= "showBranchDisplacement";
+	static final String SHOW_LEAF_BORDER	= "showLeafBorder";
 	static final String SHOW_LEAF_DISP		= "showLeafDisplacement";
 	static final String SHOW_STATISTICS		= "statistics";
 	static final String SHOW_TREE_VIEW		= "showTreeView";
@@ -152,11 +156,12 @@ public class TreeMapProperties
 			}
 		}
 		else if ((key.equalsIgnoreCase(USE_LABELS)) || (key.equalsIgnoreCase(IS_TRANSPARENT)) ||
-				(key.equalsIgnoreCase(ALLOW_VERTICAL)) || 
-				(key.equalsIgnoreCase(LABEL_LEAVES)) || (key.equalsIgnoreCase(LABEL_BRANCHES)) ||
-				(key.equalsIgnoreCase(SHOW_LEAF_DISP)) || (key.equalsIgnoreCase(SHOW_ARROW_HEAD)) ||
-				(key.equalsIgnoreCase(SHOW_STATISTICS)) || (key.equalsIgnoreCase(SHOW_TREE_VIEW)) ||
-				(key.equalsIgnoreCase(TEXT_ONLY)) || (key.equalsIgnoreCase(VERBOSE)))
+			 	 (key.equalsIgnoreCase(ALLOW_VERTICAL)) || 
+				 (key.equalsIgnoreCase(SHOW_LEAF_BORDER)) ||
+				 (key.equalsIgnoreCase(LABEL_LEAVES)) || (key.equalsIgnoreCase(LABEL_BRANCHES)) ||
+				 (key.equalsIgnoreCase(SHOW_LEAF_DISP)) || (key.equalsIgnoreCase(SHOW_ARROW_HEAD)) ||
+				 (key.equalsIgnoreCase(SHOW_STATISTICS)) || (key.equalsIgnoreCase(SHOW_TREE_VIEW)) ||
+				 (key.equalsIgnoreCase(TEXT_ONLY)) || (key.equalsIgnoreCase(VERBOSE)))
 		{
 			if ((value.equalsIgnoreCase("true")) || (value.equalsIgnoreCase("false")))
 			{
@@ -218,12 +223,13 @@ public class TreeMapProperties
 			properties.setProperty(key.toLowerCase(), value);
 		}
 		else if ((key.equalsIgnoreCase(WIDTH)) || (key.equalsIgnoreCase(HEIGHT)) || 
-				(key.equalsIgnoreCase(MAX_LEAF_TEXT)) || (key.equalsIgnoreCase(LEAF_VECTOR_WIDTH)))
+				(key.equalsIgnoreCase(MAX_LEAF_TEXT)) || (key.equalsIgnoreCase(LEAF_VECTOR_WIDTH)) ||
+				(key.equalsIgnoreCase(LEAF_BORDER_WEIGHT)))
 		{
 			try
 			{
 				double dimension = Double.parseDouble(value);
-				if (dimension < 0)
+				if ((dimension < 0) && (!key.equalsIgnoreCase(LEAF_BORDER_WEIGHT)))
 				{
 					System.err.println("'"+key+"' must be at least 0, but "+dimension+" was given.");
 					return false;
@@ -236,7 +242,8 @@ public class TreeMapProperties
 			}
 			properties.setProperty(key.toLowerCase(), value);
 		}
-		else if ((key.toLowerCase().startsWith(BORDER.toLowerCase())) && (!key.toLowerCase().startsWith(BORDER_COLOUR.toLowerCase())))
+		else if ((key.toLowerCase().startsWith(BORDER.toLowerCase())) && (!key.toLowerCase().startsWith(BORDER_COLOUR.toLowerCase()))
+																	  && (!key.toLowerCase().startsWith(BORDER_WEIGHT.toLowerCase())))
 		{
 			String levelKey = checkLevel(BORDER,key);
 			if (levelKey != null)
@@ -258,7 +265,29 @@ public class TreeMapProperties
 				properties.setProperty(key.toLowerCase(), value);
 			}
 		}
-		else if ((key.equalsIgnoreCase(BORDER_COLOUR)) || (key.equalsIgnoreCase(LEAF_TEXT_COLOUR)))
+		else if (key.toLowerCase().startsWith(BORDER_WEIGHT.toLowerCase()))	 
+		{
+			String levelKey = checkLevel(BORDER_WEIGHT,key);
+			if (levelKey != null)
+			{
+				try
+				{
+					double dimension = Double.parseDouble(value);
+					if (dimension < 0)
+					{
+						System.err.println("'"+key+"' must be at least 0, but "+dimension+" was given.");
+						return false;
+					}
+				}
+				catch (NumberFormatException e)
+				{
+					System.err.println("Cannot extract numeric value '"+value+"' from  ' "+key+"'.");
+					return false;
+				}
+				properties.setProperty(key.toLowerCase(), value);
+			}
+		}
+		else if ((key.equalsIgnoreCase(BORDER_COLOUR)) || (key.equalsIgnoreCase(LEAF_TEXT_COLOUR)) || (key.equalsIgnoreCase(LEAF_BORDER_COLOUR)))
 		{
 			if (getHexColour(value) == null)
 			{
@@ -574,6 +603,22 @@ public class TreeMapProperties
 	{
 		return getHexColour(properties.getProperty(LEAF_TEXT_COLOUR.toLowerCase()));
 	}
+	
+	/** Provides the colour used to display leaf borders.
+	 *  @return Colour used to display leaf borders.
+	 */
+	public Color getLeafBorderColour()
+	{
+		return getHexColour(properties.getProperty(LEAF_BORDER_COLOUR.toLowerCase()));
+	}
+	
+	/** Provides the line thickness used to display leaf borders.
+	 *  @return Line thickness in pixels of leaf borders.
+	 */
+	public float getLeafBorderWeight()
+	{
+		return Float.parseFloat(properties.getProperty(LEAF_BORDER_WEIGHT.toLowerCase()));
+	}
 
 	/** Provides the name of the font used to display leaf labels.
 	 *  @return Font used to display leaf labels.
@@ -581,6 +626,14 @@ public class TreeMapProperties
 	public String getLeafTextFont()
 	{
 		return properties.getProperty(LEAF_TEXT_FONT.toLowerCase());
+	}
+	
+	/** Reports whether or not leaf nodes are shown with borders.
+	 *  @return True if leaf nodes are to be shown with borders.
+	 */
+	public boolean getShowLeafBorder()
+	{
+		return Boolean.parseBoolean(properties.getProperty(SHOW_LEAF_BORDER.toLowerCase()));
 	}
 
 	/** Provides the colour used to display borders
@@ -711,6 +764,16 @@ public class TreeMapProperties
 		buildParamArray(BORDER, borders);		
 		return borders;
 	}
+	
+	/** Provides a set of ordered border weight settings for each level of the treemap hierarchy.
+	 *  @return Ordered collection of border weight settings.
+	 */
+	public float[] getBorderWeights()
+	{
+		float[] borderWeights = new float[TreeMapApp.MAX_DEPTH];
+		buildParamArray(BORDER_WEIGHT, borderWeights);		
+		return borderWeights;
+	}
 
 	/** Provides a set of ordered maximum branch text size settings for each level of the treemap hierarchy.
 	 *  @return Ordered collection of maximum branch text size settings.
@@ -771,11 +834,15 @@ public class TreeMapProperties
 		properties.setProperty(ALIGN.toLowerCase(),"free");
 		properties.setProperty(ALLOW_VERTICAL.toLowerCase(),"false");
 		properties.setProperty(BORDER.toLowerCase(),"1");
+		properties.setProperty(BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(BORDER_COLOUR.toLowerCase(),"#000000");
 		properties.setProperty(HEIGHT.toLowerCase(),"400");
 		properties.setProperty(LABEL_BRANCHES.toLowerCase(),"false");
 		properties.setProperty(LABEL_LEAVES.toLowerCase(),"true");
 		properties.setProperty(LAYOUT.toLowerCase(),"orderedSquarified");
+		properties.setProperty(SHOW_LEAF_BORDER.toLowerCase(),"false");
+		properties.setProperty(LEAF_BORDER_COLOUR.toLowerCase(),"#000000");
+		properties.setProperty(LEAF_BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(LEAF_TEXT_COLOUR.toLowerCase(),"#00000096");
 		properties.setProperty(LEAF_TEXT_FONT.toLowerCase(),"SansSerif");
 		properties.setProperty(LEAF_VECTOR_WIDTH.toLowerCase(),"0.3");

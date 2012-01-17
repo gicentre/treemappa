@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.0.1, 4th April, 2011.
+ *  @version 3.1, 17th January, 2012.
  */
 //  **************************************************************************
 
@@ -59,6 +59,7 @@ public class TreeMappa
 	private Vector<OrderDistance> leafDistances;	// For R-squared calculation of order-distance relationship.
 
 	private double[] borderWidths;					// Width of border surrounding node in treemap.
+	private boolean allowLeafBorders;				// Determines if leaf nodes are to be drawn with borders.
 
 	private double aspectRatio,readability,distDisplacement,angDisplacement;
 	private int numNodes, numAdjacentLeaves, numSpatialNodes;
@@ -69,8 +70,7 @@ public class TreeMappa
 	private int maxDepth = 0;
 	private boolean isVerbose;
 	private boolean needsRebuild;					// Indicates if some properties of the treemap have been changed
-	// that will require a rebuild of the treemap to come into effect.
-
+													// that will require a rebuild of the treemap to come into effect.
 	private static final int CSV = 0;
 	private static final int CSV_COMPACT = 1;
 	private static final int CSV_SPATIAL = 2;
@@ -79,8 +79,6 @@ public class TreeMappa
 
 	private TreeMapProperties props;				// Treemap configuration properties.
 	
-	private boolean allowLeafBorders=false;
-
 	// ------------------------- Constructor ----------------------------
 
 	/** Creates an object capable of creating a treemap from the hierarchical data identified in the given
@@ -662,6 +660,23 @@ public class TreeMappa
 	{
 		return needsRebuild;
 	}
+	
+	/** Reports whether or not leaf nodes have borders.
+	 *  @return True if leaf nodes are to be laid out with borders.
+	 *  @deprecated Should use getShowLeafBorders() instead.
+	 */
+	public boolean getAllowLeafBorders()
+	{
+		return getShowLeafBorders();
+	}
+	
+	/** Reports whether or not leaf nodes have borders.
+	 *  @return True if leaf nodes are to be laid out with borders.
+	 */
+	public boolean getShowLeafBorders()
+	{
+		return allowLeafBorders;
+	}
 
 	// ------------------ Requests that change the tree layout but not the tree structure
 
@@ -700,12 +715,19 @@ public class TreeMappa
 		return false;
 	}
 	
-	/**Allows leaf nodes to have borders
-	 * False by default.
-	 * @param allowLeafBorders
+	/** Determines whether or not leaf nodes have borders.
+	 *  @param allowLeafBorders
 	 */
-	public void setAllowLeafBorders(boolean allowLeafBorders){
-		this.allowLeafBorders=allowLeafBorders;
+	public boolean setAllowLeafBorders(boolean allowLeafBorders)
+	{
+		boolean success = props.setParameter(TreeMapProperties.SHOW_LEAF_BORDER, String.valueOf(allowLeafBorders));
+		if (success)
+		{
+			needsRebuild = true;
+			this.allowLeafBorders = allowLeafBorders;
+			return true;
+		}
+		return false;
 	}
 
 	/** Sets the border size of the treemap. Note that since this operation requires the recalculation
@@ -723,7 +745,7 @@ public class TreeMappa
 		}
 		return false;
 	}
-
+	
 	/** Sets the border size of the nodes at the given level in the treemap. Note that since this
 	 *  operation requires the recalculation of the treemap layout, no changes will be made until 
 	 *  <code>buildTreeMap()</code> is called.
@@ -741,7 +763,7 @@ public class TreeMappa
 		}
 		return false;
 	}
-
+	
 	/** Sets the a new default layout for the treemap. Note that since this operation requires the
 	 *  recalculation of the treemap layout, no changes will be made until <code>buildTreeMap()</code> 
 	 *  is called.
@@ -1544,9 +1566,9 @@ public class TreeMappa
 	}
 
 	/** Computes the treemap layout. Lays out all the children of the given parent node
-	 * then recursively calls itself to lay out all descendants. 
-	 * @param parent Parent node whose children will be laid out. 
-	 * @param rectangle Rectangle into which nodes must be laid out.
+	 *  then recursively calls itself to lay out all descendants. 
+	 *  @param parent Parent node whose children will be laid out. 
+	 *  @param rectangle Rectangle into which nodes must be laid out.
 	 */
 	private void layout(TreeMapNode parent, Rectangle2D rectangle)
 	{
@@ -1562,32 +1584,32 @@ public class TreeMappa
 		// Lay out siblings
 		switch (layoutTypes[level])
 		{
-		case SLICE_AND_DICE:
-			sliceAndDice(nodesToLayout, rect,alignments[level]);
-			break;
-		case SQUARIFIED:
-			squarify(nodesToLayout, rect,alignments[level]);
-			break;
-		case MORTON:
-			mortonise((MortonList<TreeMapNode>)nodesToLayout, rect);
-			break;
-		case SPATIAL:	
-			orderedSquarify(nodesToLayout, rect,Layout.SPATIAL,alignments[level]);
-			break;
-		case SPATIAL_AV:	
-			orderedSquarify(nodesToLayout, rect,Layout.SPATIAL_AV,alignments[level]);
-			break;
-		case STRIP:
-			stripMap(nodesToLayout, rect,alignments[level]);
-			break;
-		case PIVOT_MIDDLE:
-		case PIVOT_SIZE:
-		case PIVOT_SPLIT_SIZE:
-		case PIVOT_SPACE:
-			pivot(nodesToLayout, rect);
-			break;
-		default:
-			orderedSquarify(nodesToLayout, rect,Layout.ORDERED_SQUARIFIED,alignments[level]);
+			case SLICE_AND_DICE:
+				sliceAndDice(nodesToLayout, rect,alignments[level]);
+				break;
+			case SQUARIFIED:
+				squarify(nodesToLayout, rect,alignments[level]);
+				break;
+			case MORTON:
+				mortonise((MortonList<TreeMapNode>)nodesToLayout, rect);
+				break;
+			case SPATIAL:	
+				orderedSquarify(nodesToLayout, rect,Layout.SPATIAL,alignments[level]);
+				break;
+			case SPATIAL_AV:	
+				orderedSquarify(nodesToLayout, rect,Layout.SPATIAL_AV,alignments[level]);
+				break;
+			case STRIP:
+				stripMap(nodesToLayout, rect,alignments[level]);
+				break;
+			case PIVOT_MIDDLE:
+			case PIVOT_SIZE:
+			case PIVOT_SPLIT_SIZE:
+			case PIVOT_SPACE:
+				pivot(nodesToLayout, rect);
+				break;
+			default:
+				orderedSquarify(nodesToLayout, rect,Layout.ORDERED_SQUARIFIED,alignments[level]);
 		}
 
 		nodesToLayout.clear();

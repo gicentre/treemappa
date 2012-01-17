@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -46,7 +47,7 @@ import org.gicentre.utils.colour.ColourTable;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th March, 2011.
+ *  @version 3.1, 17th January, 2012.
  */
 // ***************************************************************************************************
 
@@ -88,7 +89,9 @@ public class TreeMapPanel extends JPanel
 	private boolean allowVerticalLabels;
 	private Color borderColour;
 	private Color[] branchTextColours;
-	private Color leafTextColour;
+	private float[] borderWeights;		// Line thickness of borders at each level.
+	private float leafBorderWeight;
+	private Color leafTextColour,leafBorderColour;
 	private float mutation;
 	private boolean showArrowHead;
 	private boolean[] showBranchDisplacements;
@@ -158,8 +161,11 @@ public class TreeMapPanel extends JPanel
 		randColourLevel = props.getRandColourLevel();
 		allowVerticalLabels = props.getAllowVerticalLabels();
 		borderColour = props.getBorderColour();
+		borderWeights = props.getBorderWeights();
 		branchTextColours = props.getBranchTextColours();
 		leafTextColour = props.getLeafTextColour();
+		leafBorderColour = props.getLeafBorderColour();
+		leafBorderWeight = props.getLeafBorderWeight();
 		mutation = props.getMutation();
 		showArrowHead = props.getShowArrowHead();
 		showBranchDisplacements = props.getShowBranchDisplacements();
@@ -235,7 +241,7 @@ public class TreeMapPanel extends JPanel
 	// ------------------------ Methods ------------------------
 
 	/** Draws the tree map nodes.
-	 * @param g Graphics context in which to draw. 
+	 *  @param g Graphics context in which to draw. 
 	 */
 	public void paintComponent(Graphics g)
 	{
@@ -293,8 +299,8 @@ public class TreeMapPanel extends JPanel
 	}
 
 	/** Writes the tree map display to an image or SVG file with the given name.
-	 * @param imgFileName Name of image file to write.
-	 * @return True if file written successfully.
+	 *  @param imgFileName Name of image file to write.
+	 *  @return True if file written successfully.
 	 */
 	public boolean writeImage(String imgFileName)
 	{		
@@ -356,8 +362,6 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}
 
-
-
 	/** Updates the tree map display to be shown in this panel.
 	 */
 	public void updateImage()
@@ -365,12 +369,32 @@ public class TreeMapPanel extends JPanel
 		Graphics2D g = (Graphics2D)screenImg.getGraphics();
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, screenImg.getWidth(), screenImg.getHeight());
-		BasicStroke leafStroke = new BasicStroke(leafVectorWidth); 
+		BasicStroke leafStroke = new BasicStroke(leafVectorWidth);
+		BasicStroke leafBorderStroke = new BasicStroke(0.1f);
+				
+		if (treeMappa.getShowLeafBorders())
+		{
+			if (leafBorderWeight >0)
+			{
+				leafBorderStroke = new BasicStroke(leafBorderWeight);
+			}
+			else if (leafBorderWeight == 0)
+			{
+				leafBorderStroke = null;
+			}
+		}
 
 		BasicStroke[] branchStrokes = new BasicStroke[vectorWidths.length];
+		BasicStroke[] branchBorderStrokes = new BasicStroke[borderWeights.length];
+		
 		for (int i=0; i<branchStrokes.length; i++)
 		{
 			branchStrokes[i] = new BasicStroke(vectorWidths[i]*10); 
+		}
+		
+		for (int i=0; i<borderWeights.length; i++)
+		{
+			branchBorderStrokes[i] = new BasicStroke(Math.max(1,borderWeights[i])); 
 		}
 
 		g.setFont(leafFont);
@@ -481,7 +505,15 @@ public class TreeMapPanel extends JPanel
 				}
 			}
 
-			g.setColor(new Color(borderColour.getRed()/255f,borderColour.getGreen()/255f,borderColour.getBlue()/255f,0.1f));
+			if (leafBorderStroke != null)
+			{
+				g.setStroke(leafBorderStroke);
+				g.setColor(new Color(leafBorderColour.getRed()/255f,leafBorderColour.getGreen()/255f,leafBorderColour.getBlue()/255f));	
+			}
+			else
+			{
+				g.setColor(new Color(leafBorderColour.getRed()/255f,leafBorderColour.getGreen()/255f,leafBorderColour.getBlue()/255f,0.1f));
+			}
 			g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 
@@ -496,7 +528,7 @@ public class TreeMapPanel extends JPanel
 			Rectangle bounds = branch.getBounds().getBounds();		
 			int level = branch.getLevel();
 			g.setFont(branchFonts[level-1]);
-
+			
 			// Draw branch label.
 			if (showBranchLabels && bounds.width > 10)
 			{
@@ -590,8 +622,13 @@ public class TreeMapPanel extends JPanel
 				}
 			}
 			float opacity = Math.max(0.1f,(maxDepth-level)/(float)maxDepth);
-			g.setColor(new Color(borderColour.getRed()/255f,borderColour.getGreen()/255f,borderColour.getBlue()/255f,opacity));
-			g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+
+			if (borderWeights[level] != 0)
+			{
+				g.setStroke(branchBorderStrokes[level]);
+				g.setColor(new Color(borderColour.getRed()/255f,borderColour.getGreen()/255f,borderColour.getBlue()/255f,opacity));
+				g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+			}
 		}
 
 		// Draw displacement vectors if requested.
@@ -743,6 +780,22 @@ public class TreeMapPanel extends JPanel
 	{
 		return maxBranchTexts;
 	}
+	
+	/** Reports the border weights for branch at each level.
+	 *  @return Border weights in pixels for branches.
+	 */
+	float[] getBorderWeights()
+	{
+		return borderWeights;
+	}
+	
+	/** Reports the border weight for leaf nodes
+	 *  @return Border weights in pixels for leaf nodes.
+	 */
+	float getLeafBorderWeight()
+	{
+		return leafBorderWeight;
+	}
 
 	/** Reports the maximum depth of the hierarchy.
 	 *  @return maximum depth of the hierarchy.
@@ -775,6 +828,14 @@ public class TreeMapPanel extends JPanel
 	{
 		return leafTextColour;
 	}
+	
+	/** Reports the leaf border colour.
+	 *  @return Leaf border colour.
+	 */
+	Color getLeafBorderColour()
+	{
+		return leafBorderColour;
+	}
 
 	/** Reports the branch text label colours for each level of the hierarchy.
 	 *  @return Branch text colours.
@@ -798,6 +859,15 @@ public class TreeMapPanel extends JPanel
 	boolean getShowLeafDisplacement()
 	{
 		return showLeafDisplacement;
+	}
+	
+	/** Reports whether or not leaf nodes have borders.
+	 *  @return True if leaf nodes are to be laid out with borders.
+	 */
+	
+	boolean getShowLeafBorders()
+	{
+		return treeMappa.getShowLeafBorders();
 	}
 
 
@@ -849,6 +919,17 @@ public class TreeMapPanel extends JPanel
 	{
 		return setLeafTextColour(new Color(textColour,true));
 	}
+	
+	/** Sets the colour used to display leaf borders. This version uses a single RGBA integer to represent 
+	 *  the colour and is compatible with Processing's storage of colour values. Note that the treemap
+	 *  will not use this new setting until a call to <code>updateImage()</code> is made.
+	 *  @param borderColour New colour in which to display treemap leaf borders.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setLeafBorderColour(int borderColour)
+	{
+		return setLeafBorderColour(new Color(borderColour,true));
+	}
 
 	/** Sets the colour used to display leaf text. Note that the treemap will not use this new 
 	 *  setting until a call to <code>updateImage()</code> is made.
@@ -859,6 +940,18 @@ public class TreeMapPanel extends JPanel
 	{
 		this.leafTextColour = textColour;
 		treeMappa.getConfig().setParameter("leafTextColour", getHexString(textColour.getRGB()));
+		return true;
+	}
+	
+	/** Sets the colour used to display leaf borders. Note that the treemap will not use this new 
+	 *  setting until a call to <code>updateImage()</code> is made.
+	 *  @param borderColour New colour in which to display treemap leaf borders.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setLeafBorderColour(Color borderColour)
+	{
+		this.leafBorderColour = borderColour;
+		treeMappa.getConfig().setParameter("leafBorderColour", getHexString(borderColour.getRGB()));
 		return true;
 	}
 
@@ -1260,6 +1353,44 @@ public class TreeMapPanel extends JPanel
 	{
 		return treeMappa.setBorders(borderSize);
 	}
+	
+	/** Determines whether or not leaf nodes are to be laid out with borders. Note that since this 
+	 *  operation requires the recalculation of the treemap layout, no changes will be made until
+	 *  <code>updateLayout()</code> is called.
+	 *  @param allowLeafBorders
+	 */
+	public boolean setShowLeafBorders(boolean allowLeafBorders)
+	{
+		return treeMappa.setAllowLeafBorders(allowLeafBorders);
+	}
+	
+	/** Sets the border weight of the treemap. Unlike <code>setBorders()</code> this does not affect the 
+	 *  border spacing between nodes, but rather the thickness of the border line used.
+	 *  @param borderWeight Thickness of border lines in pixels used to separate treemap nodes 
+	 *                      or -1 for default border weight.
+	 *  @return True if new property is updated successfully.
+	 */
+	public boolean setBorderWeights(float borderWeight)
+	{
+		for (int i=0; i<borderWeights.length; i++)
+		{
+			borderWeights[i] = borderWeight;
+		}
+		treeMappa.getConfig().setParameter("borderWeight", Float.toString(borderWeight));
+		return true;
+	}
+	
+	/** Sets the border weight of leaf nodes. Unlike <code>setBorders()</code> this does not affect the 
+	 *  border spacing between nodes, but rather the thickness of the border line used. 
+	 *  @param borderWeight Thickness of border lines in pixels used to separate leaf nodes.
+	 *  @return True if new property is updated successfully.
+	 */
+	public boolean setLeafBorderWeight(float borderWeight)
+	{
+		this.leafBorderWeight = borderWeight;
+		treeMappa.getConfig().setParameter("leafBorderWeight", Float.toString(borderWeight));
+		return true;
+	}
 
 	/** Sets the border size of the nodes at the given level in the treemap. Note that since this operation
 	 *  requires the recalculation of the treemap layout, no changes will be made until <code>updateLayout()</code>
@@ -1271,6 +1402,25 @@ public class TreeMapPanel extends JPanel
 	public boolean setBorder(int level, float borderSize)
 	{
 		return treeMappa.setBorder(level,borderSize);
+	}
+	
+	/** Sets the border weight of the nodes at the given level in the treemap. Unlike <code>setBorder()</code> 
+	 *  this does not affect the border spacing between nodes, but rather the thickness of the border line used.
+	 *  @param level Level of the hierarchy at which the given border weight setting is to apply.
+	 *  @param borderWeight Thickness of border lines in pixels used to separate treemap nodes 
+	 *                      or -1 for default border weight
+	 *  @return True if new property is updated successfully.
+	 */
+	public boolean setBorderWeight(int level, float borderWeight)
+	{
+		if ((level < 0) || (level >= borderWeights.length))
+		{
+			System.err.println("Cannot set branch maximum text size at level "+level+". Must be between 0 and "+(borderWeights.length-1));
+			return false;
+		}
+		borderWeights[level] = borderWeight;
+		treeMappa.getConfig().setParameter("borderWeight"+level, Float.toString(borderWeight));
+		return true;
 	}
 
 	/** Sets the a new default layout for the treemap. Note that no visible changes to the layout will be made until 
@@ -1358,9 +1508,7 @@ public class TreeMapPanel extends JPanel
 			//node.removeFromParent();
 			parent.remove(node);
 		}
-
 	}
-
 
 	// ---------------------------------- Accessor methods ----------------------------------
 
