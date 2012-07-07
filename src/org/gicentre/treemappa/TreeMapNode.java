@@ -12,7 +12,7 @@ import javax.swing.tree.*;
  *  the size of the node, a numeric value representing the colour of the node and the sum of numeric
  *  size values below it in the tree.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th March, 2011
+ *  @version 3.1.1, 7th July, 2012
  */ 
 // ****************************************************************************************************
 
@@ -63,6 +63,41 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 
 	// --------------------------- Constructors ----------------------------
 
+	/** Creates a node with the given label. Assumes an order value of 1 and an undefined colour. 
+	 *  Until this node is added to an existing tree, it is assumed to be a root leaf node. If the node
+	 *  is a leaf it will have a unit size, otherwise it will have a size that is the accumulated size of all
+	 *  its children.
+	 *  @param label Text label of the node.
+	 */
+	public TreeMapNode(String label)
+	{
+		this(label,1, null,null,null);
+	}
+	
+	/** Creates a node with the given label and size. Assumes an order value of 1 and an undefined colour. 
+	 *  Until this node is added to an existing tree, it is assumed to be a root leaf node.
+	 *  @param label Text label of the node.
+	 *  @param sizeValue Numeric value to be associated with the size of the node. If this value is negative,
+	 *                   this node is treated as a dummy node with the size of <code>abs(sizeValue)</code>.
+	 */
+	public TreeMapNode(String label, float sizeValue)
+	{
+		this(label,1, new Float(sizeValue),null,null);
+	}
+	
+	/** Creates a node with the given label and size value. Assumes an order value of 1 and an undefined colour. 
+	 *  Until this node is added to an existing tree, it is assumed to be a root leaf node.
+	 *  @param label Text label of the node.
+	 *  @param sizeValue Numeric value to be associated with the size of the node or null if it is to be found
+	 *                   from the accumulated values of its descendants. If this is a leaf node (ie it has no
+	 *                   descendants) and <code>sizeValue</code> is null, its size is assumed to be 1. If this
+	 *                   value is negative, this node is treated as a dummy node with the size of <code>abs(sizeValue)</code>.
+	 */
+	public TreeMapNode(String label, Float sizeValue)
+	{
+		this(label,1, sizeValue,null,null);
+	}
+	
 	/** Creates a node with the given label, order, size value and colour value. Until this node 
 	 *  is added to an existing tree, it is assumed to be a root leaf node.
 	 *  @param label Text label of the node.

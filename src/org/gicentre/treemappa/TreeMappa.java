@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.1, 17th January, 2012.
+ *  @version 3.1.1, 7th July, 2012.
  */
 //  **************************************************************************
 
@@ -1774,6 +1774,11 @@ public class TreeMappa
 			for (int i=0; i<locatedNodes.size(); i++)
 			{    			
 				Point2D location = ((TreeMapNode)(locatedNodes.get(i).getObject())).getLocation();
+				if (location == null)
+				{
+					System.err.println("Warning: Cannot apply spatial layout to non-spatial nodes.");
+					break;
+				}
 				if (location.getX() < xMin)
 				{
 					xMin = location.getX();
@@ -1939,8 +1944,14 @@ public class TreeMappa
 
 					// Use location to determine layout by scaling remaining locations to fit inside remaining rectangle.
 					for (int i=0; i<locatedNodes.size(); i++)
-					{
+					{						
 						Point2D location = ((TreeMapNode)(locatedNodes.get(i).getObject())).getLocation();
+						if (location == null)
+						{
+							System.err.println("Warning: Cannot apply spatial layout to non-spatial nodes.");
+							break;
+						}
+						
 						if (location.getX() < xMin)
 						{
 							xMin = location.getX();

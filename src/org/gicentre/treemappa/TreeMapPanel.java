@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Stroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -47,7 +46,7 @@ import org.gicentre.utils.colour.ColourTable;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.1, 17th January, 2012.
+ *  @version 3.1, 21st April, 2012.
  */
 // ***************************************************************************************************
 
@@ -113,7 +112,7 @@ public class TreeMapPanel extends JPanel
 	private float[] maxBranchTexts;		// Largest text size for non-leaf labels (point size or 0 for no max)
 
 	private AffineTransform trans,    	// Georef to pixel transformation.
-	iTrans;    	// Pixel to georef transformation.
+						    iTrans;    	// Pixel to georef transformation.
 
 	Point2D.Float panOffset;
 
@@ -1458,7 +1457,7 @@ public class TreeMapPanel extends JPanel
 	/** Removes the tree data from a the given level of the hierarchy. If the nodes to cut
 	 *  are leaves, they are removed entirely from the tree. If they are branches, then their
 	 *  children are attached to the removed node's parent. Note that the treemap will not be
-	 *  updated until a call to <code>updateLayout()<code> is made.
+	 *  updated until a call to <code>updateLayout()</code> is made.
 	 *  @param level Level of the hierarchy at which to apply the operation.
 	 *  @return True if the operation has been performed successfully.
 	 */
@@ -2098,7 +2097,6 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}  
 
-
 	/** Writes out a given line of text on its own line to the given
 	 * buffered writer.
 	 * @param text Text to write.
@@ -2155,12 +2153,11 @@ public class TreeMapPanel extends JPanel
 		calcTransformation(panelWidth,panelHeight, 0,false);
 	}
 
-	/** Calculates the transformations required to convert between
-	 * pixel coordinates and georeferenced coordinates.
-	 * @param panelWidth Width of panel in which image is drawn.
-	 * @param panelHeight Height of panel in which image is drawn.
-	 * @param borderSize Size of border around image in panel.
-	 * @param ignoreZoom If true, will ignore current zoom settings when calculating transformation.
+	/** Calculates the transformations required to convert between pixel coordinates and georeferenced coordinates.
+	 *  @param panelWidth Width of panel in which image is drawn.
+	 *  @param panelHeight Height of panel in which image is drawn.
+	 *  @param borderSize Size of border around image in panel.
+	 *  @param ignoreZoom If true, will ignore current zoom settings when calculating transformation.
 	 */
 	private void calcTransformation(int panelWidth, int panelHeight, int borderSize, boolean ignoreZoom)
 	{
@@ -2208,26 +2205,24 @@ public class TreeMapPanel extends JPanel
 	}
 
 	/** Transforms the given point from georeferenced to pixel coordinates.
-	 * @param geo Georeferenced coordinate pair to transform.
-	 * @return Pixel coordinate pair representing the given georeferenced point.
+	 *  @param geo Georeferenced coordinate pair to transform.
+	 *  @return Pixel coordinate pair representing the given georeferenced point.
 	 */
 	Point2D getGeoToPixel(Point2D geo)
 	{
 		Point2D pxl = new Point2D.Float();
 		trans.transform(geo,pxl);
-
 		return pxl; 
 	}
 
 	/** Transforms the given point from pixel to georeferenced coordinates.
-	 * @param pxl Pixel coordinate pair to transform.
-	 * @return Georeferenced coordinate pair representing the given pixel coordinates.
+	 *  @param pxl Pixel coordinate pair to transform.
+	 *  @return Georeferenced coordinate pair representing the given pixel coordinates.
 	 */
 	public Point2D getPixelToGeo(Point2D pxl)
 	{
 		Point2D geo = new Point2D.Float();
 		iTrans.transform(pxl,geo);
-
 		return geo;        
 	}
 

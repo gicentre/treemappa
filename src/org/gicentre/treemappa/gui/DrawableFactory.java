@@ -5,7 +5,7 @@ package org.gicentre.treemappa.gui;
  *  external libraries to be used by treeMappa. It's main purpose is to allow sketchy
  *  graphics to be drawn with a HandyRenderer from the handy library.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 15th January, 2012
+ *  @version 1.1, 7th July, 2012
  */ 
 // *****************************************************************************************
 
@@ -77,6 +77,23 @@ public class DrawableFactory
 		 */
 		public void rect(float x, float y, float w, float h)
 		{
+			handy.rect(x, y, w, h);
+		}
+		
+		/** Should draw a curved rectangle using the given location and dimensions with a given radii of curvature in 
+		 *  the x and y directions. Currently, curved corners are ignored in this implementation. By default the x,y 
+		 *  coordinates will be the top left of the rectangle, but the meanings of these parameters should be able 
+		 *  to be changed with Processing's rectMode() command.
+		 *  @param x x coordinate of the rectangle position
+		 *  @param y y coordinate of the rectangle position.
+		 *  @param w Width of the rectangle (but see modifications possible with rectMode())
+		 *  @param h Height of the rectangle (but see modifications possible with rectMode())
+		 *  @param rx Radius of curvature of the rectangle's corners in the horizontal direction (<b>Currently ignored</b>).
+		 *  @param ry Radius of curvature of the rectangle's corners in the vertical direction (<b>Currently ignored</b>).
+		 */
+		public void rect(float x, float y, float w, float h, float rx, float ry)
+		{
+			// TODO: Implement handy rectangle with curved edges.
 			handy.rect(x, y, w, h);
 		}
 		

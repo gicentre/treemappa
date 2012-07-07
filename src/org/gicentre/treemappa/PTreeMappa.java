@@ -17,7 +17,7 @@ import processing.xml.XMLElement;
 //********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.1, 17th January, 2012.
+ *  @version 3.1.1, 7th July, 2012.
  */
 //  ******************************************************************************
 
@@ -39,10 +39,13 @@ public class PTreeMappa
 {
 	// ------------------------------------ Object variables ------------------------------------
 	
-	PApplet parent;						// Processing sketch that will use the treemap.
-	private TreeMappa treeMappa;		// TreeMappa object doing the treemapping stuff.
-	private TreeMapPanel tmPanel;		// Panel for displaying treemaps.
-	private Drawable renderer;		    // Alternative renderer for sketchy graphics and other styles.
+	PApplet parent;							// Processing sketch that will use the treemap.
+	private TreeMappa treeMappa;			// TreeMappa object doing the treemapping stuff.
+	private TreeMapPanel tmPanel;			// Panel for displaying treemaps.
+	private Drawable renderer;		    	// Alternative renderer for sketchy graphics and other styles.
+	private float curveRadius;				// Curve radius for rounded rectangles.
+	private int leafAlignX,leafAlignY;		// Text alignment of leaf labels.
+	private int branchAlignX,branchAlignY;	// Text alignment of leaf labels.
 	
 	// -------------------------------------- Constructors --------------------------------------
 	
@@ -61,9 +64,19 @@ public class PTreeMappa
 	public PTreeMappa(PApplet parent, String configFileName)
 	{
 		this.parent = parent;
+		this.curveRadius = 0;
+		
+		leafAlignX = PConstants.CENTER;
+		leafAlignY = PConstants.CENTER;
+		branchAlignX = PConstants.CENTER;
+		branchAlignY = PConstants.CENTER;
 		
 		TreeMapProperties props = new TreeMapProperties();
 		treeMappa = new TreeMappa(props);
+		
+		// Default size is that of the sketch unless it is specified in a user config file.
+		treeMappa.getConfig().setParameter(TreeMapProperties.WIDTH, Integer.toString(parent.width));
+		treeMappa.getConfig().setParameter(TreeMapProperties.HEIGHT, Integer.toString(parent.height));
 				
 		InputStream configStream = parent.createInput(configFileName);
 		if (configStream != null)
@@ -72,9 +85,7 @@ public class PTreeMappa
 		}
 	}
 	
-	
 	// ---------------------------------------- Methods ----------------------------------------
-	
 	
 	/** Reads in CSV tree data from the Processing sketch's data folder. If you need to read data
 	 *  from other locations, use TreeMappa's file reading methods instead.
@@ -99,11 +110,7 @@ public class PTreeMappa
 		treeMappa.getConfig().setParameter(TreeMapProperties.USE_LABELS, "true");
 		//treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,parent.dataPath(dataFileName));
 		treeMappa.getConfig().setParameter(TreeMapProperties.IN_FILE,dataFileName);
-		
-		// Layout assumed to be size of the parent sketch.
-		treeMappa.getConfig().setParameter(TreeMapProperties.WIDTH, Integer.toString(parent.width));
-		treeMappa.getConfig().setParameter(TreeMapProperties.HEIGHT, Integer.toString(parent.height));
-		
+				
 		treeMappa.readData(this);
 		treeMappa.buildTreeMap();
 						
@@ -120,9 +127,24 @@ public class PTreeMappa
 		
 		// Create a default panel the size of the parent sketch.
 		tmPanel = treeMappa.createPanel();
-
 	}
 	
+	/** Builds the treemap from the hierarchical data stored in this object. This method should be called in preference
+	 *  to <ode>buildTreeMap()</code> in the <code>TreeMappa</code> class since it will update the treemap panel used
+	 *  for drawing in Processing.
+	 *  @return True if the tree has been built without problems.
+	 */
+	public boolean buildTreeMap()
+	{
+		if (treeMappa.buildTreeMap() == false)
+		{
+			return false;
+		}
+		
+		tmPanel = treeMappa.createPanel();
+		return true;
+	}
+		
 	/** Draws and provides an image containing the current treemap. Note that this will update the treemap with
 	 *  the current layout settings so should not be called repeatedly if no changes have been made since the
 	 *  previous call. Instead, call it once and store the resulting image as a PImage variable.
@@ -149,7 +171,8 @@ public class PTreeMappa
 	{
 		parent.pushStyle();
 		parent.textSize(40);
-		
+		float textPadding = parent.textWidth("i");
+				
 		for (NodePanel leaf : tmPanel.getLeaves())
 		{
 			if (leaf.isDummy())
@@ -194,11 +217,11 @@ public class PTreeMappa
 			
 			if (renderer == null)
 			{
-				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
 			}
 			else
 			{
-				renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+				renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
 			}
 
 			// Draw leaf label.
@@ -252,20 +275,77 @@ public class PTreeMappa
 					// Only use vertical text if it increases text size by at least 20% and is allowed.
 					if ((tmPanel.getAllowVerticalLabels()) && (vertScale > horizScale*1.2))
 					{
-						// Rotate text about its centre (since this will produce a larger label)
-						double cx =  bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
-						double cy =  bounds.getY() + (bounds.getHeight()-parent.textWidth(lines[i])*vertScale)/2;	        		
+						double cx,cy;						
+						int xAlign = leafAlignX;
+						int yAlign = leafAlignY;
 						
+						if (leafAlignX == PConstants.LEFT)
+						{
+							cx = bounds.getX()+ vertScale*((lines.length-i-1)*lineHeight) + textPadding;
+							yAlign = PConstants.BOTTOM;
+						}
+						else if (leafAlignX == PConstants.RIGHT)
+						{
+							cx = bounds.getX()+bounds.getWidth() - vertScale*i*lineHeight - textPadding;
+							yAlign = PConstants.TOP;
+						}
+						else
+						{
+							cx = bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+							yAlign = PConstants.BOTTOM;
+						}
+												
+						if (leafAlignY == PConstants.TOP)
+						{
+							cy = bounds.getY()+textPadding;
+							xAlign = PConstants.LEFT;
+						}
+						else if (leafAlignY == PConstants.BOTTOM)
+						{
+							cy = bounds.getY()+bounds.getHeight()-textPadding;
+							xAlign = PConstants.RIGHT;
+						}
+						else
+						{
+							cy = bounds.getY() + (bounds.getHeight()-parent.textWidth(lines[i])*vertScale)/2;
+							xAlign = PConstants.LEFT;
+						}
+						
+						parent.textAlign(xAlign,yAlign);				
 						parent.translate((float)cx,(float)cy);
 						parent.rotate(PConstants.HALF_PI);
 						parent.scale((float)vertScale,(float)vertScale);
 					}
 					else
 					{
-						// Use horizontal text.
-						x = bounds.getX() + (bounds.getWidth() - horizScale*parent.textWidth(lines[i]))/2;
-						y = bounds.getY() + (bounds.getHeight()/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
-
+						// Use horizontal text.						
+						if (leafAlignX == PConstants.LEFT)
+						{
+							x = bounds.getX() + textPadding;
+						}
+						else if (leafAlignX == PConstants.RIGHT)
+						{
+							x = bounds.getX() + bounds.getWidth() - textPadding;
+						}
+						else
+						{
+							x = bounds.getX() + bounds.getWidth()/2;
+						}
+						
+						if (leafAlignY == PConstants.TOP)
+						{
+							y = bounds.getY() + horizScale*i*lineHeight+ textPadding;
+						}
+						else if (leafAlignY == PConstants.BOTTOM)
+						{
+							y = bounds.getY() + (bounds.getHeight() - horizScale*(lines.length-i-1)*lineHeight - textPadding);
+						} 
+						else
+						{
+							y = bounds.getY() + (bounds.getHeight()/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						}
+						
+						parent.textAlign(leafAlignX,leafAlignY);
 						parent.translate((float)x,(float)y);
 						parent.scale((float)horizScale,(float)horizScale);
 					}
@@ -340,22 +420,89 @@ public class PTreeMappa
 					// Only use vertical text if it increases text size by at least 20% and is allowed.
 					if ((tmPanel.getAllowVerticalLabels()) && (vertScale > horizScale*1.2))
 					{
-						// Rotate text about its centre (since this will produce a larger label)
+						/* Rotate text about its centre (since this will produce a larger label)
 						double cx =  bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
 						double cy =  bounds.getY() + (bounds.getHeight()-(parent.textWidth(lines[i]))*vertScale)/2;
 
 						parent.translate((float)cx,(float)cy);
 						parent.rotate(PConstants.HALF_PI);
 						parent.scale((float)vertScale,(float)vertScale);
+						*/
+						
+						double cx,cy;						
+						int xAlign = leafAlignX;
+						int yAlign = leafAlignY;
+						
+						if (leafAlignX == PConstants.LEFT)
+						{
+							cx = bounds.getX()+ vertScale*((lines.length-i-1)*lineHeight) + textPadding;
+							yAlign = PConstants.BOTTOM;
+						}
+						else if (leafAlignX == PConstants.RIGHT)
+						{
+							cx = bounds.getX()+bounds.getWidth() - vertScale*i*lineHeight - textPadding;
+							yAlign = PConstants.TOP;
+						}
+						else
+						{
+							cx = bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+							yAlign = PConstants.BOTTOM;
+						}
+												
+						if (leafAlignY == PConstants.TOP)
+						{
+							cy = bounds.getY()+textPadding;
+							xAlign = PConstants.LEFT;
+						}
+						else if (leafAlignY == PConstants.BOTTOM)
+						{
+							cy = bounds.getY()+bounds.getHeight()-textPadding;
+							xAlign = PConstants.RIGHT;
+						}
+						else
+						{
+							cy = bounds.getY() + bounds.getHeight()/2;
+							xAlign = PConstants.LEFT;
+						}
+						
+						parent.textAlign(xAlign,yAlign);				
+						parent.translate((float)cx,(float)cy);
+						parent.rotate(PConstants.HALF_PI);
+						parent.scale((float)vertScale,(float)vertScale);
 					}
 					else
 					{
-						// Use horizontal text.
-						x = bounds.getX() + (bounds.getWidth() - horizScale*parent.textWidth(lines[i]))/2;
-						y = bounds.getY() + (bounds.getHeight()/2) + horizScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
+						// Use horizontal text.						
+						if (branchAlignX == PConstants.LEFT)
+						{
+							x = bounds.getX() + textPadding;
+						}
+						else if (branchAlignX == PConstants.RIGHT)
+						{
+							x = bounds.getX() + bounds.getWidth() - textPadding;
+						}
+						else
+						{
+							x = bounds.getX() + bounds.getWidth()/2;
+						}
 						
-						parent.translate((float)x, (float)y);
+						if (branchAlignY == PConstants.TOP)
+						{
+							y = bounds.getY() + horizScale*i*lineHeight+ textPadding;
+						}
+						else if (branchAlignY == PConstants.BOTTOM)
+						{
+							y = bounds.getY() + (bounds.getHeight() - horizScale*(lines.length-i-1)*lineHeight - textPadding);
+						} 
+						else
+						{
+							y = bounds.getY() + bounds.getHeight()/2;
+						}
+						
+						parent.textAlign(branchAlignX,branchAlignY);
+						parent.translate((float)x,(float)y);
 						parent.scale((float)horizScale,(float)horizScale);
+						
 					}
 					parent.text(lines[i],0,0);
 					parent.popMatrix();
@@ -377,11 +524,11 @@ public class PTreeMappa
 
 				if (renderer == null)
 				{
-					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
 				}
 				else
 				{
-					renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+					renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
 				}
 			}
 		}
@@ -443,6 +590,53 @@ public class PTreeMappa
 	public void setRenderer(Drawable renderer)
 	{
 		this.renderer = renderer;
+	}
+	
+	/** Sets the curvature radius of rounded rectangles. If 0, normal rectangles with sharp corners are
+	 *  drawn in the treemap. Values greater than 0 increase the curviness of the rectangles.
+	 *  @param curveRadius Radius of curvature of treemap rectangle corners in pixel units.
+	 */
+	public void setCurvature(float curveRadius)
+	{
+		this.curveRadius = Math.max(0,curveRadius);
+	}
+	
+	/** Sets the text alignment for leaf labels. Used for positioning the text of a leaf label relative
+	 *  to its enclosing rectangle. Will default to CENTER if alignment values not recognised.
+	 *  @param alignX Horizontal alignment of text can be Processing constants LEFT, CENTER or RIGHT.
+	 *  @param alignY Vertical alignment of text can be Processing constants TOP, CENTER, or BOTTOM.
+	 */
+	public void setLeafTextAlignment(int alignX, int alignY)
+	{
+		// Constrain to valid alignment values and default to CENTER alignment.
+		if ((alignX == PConstants.LEFT) || (alignX == PConstants.RIGHT))
+		{
+			this.leafAlignX = alignX;
+		}
+		else
+		{
+			this.leafAlignX = PConstants.CENTER;
+		}
+		
+		if ((alignY == PConstants.TOP) || (alignY == PConstants.BOTTOM))
+		{
+			this.leafAlignY = alignY;
+		}
+		else
+		{
+			this.leafAlignY = PConstants.CENTER;
+		}
+	}
+	
+	/** Sets the text alignment for branch labels. Used for positioning the text of a branch label 
+	 *  relative to its enclosing rectangle.
+	 *  @param alignX Horizontal alignment of text can be Processing constants LEFT, CENTER or RIGHT.
+	 *  @param alignY Vertical alignment of text can be Processing constants TOP, CENTER, or BOTTOM.
+	 */
+	public void setBranchTextAlignment(int alignX, int alignY)
+	{
+		this.branchAlignX = alignX;
+		this.branchAlignY = alignY;
 	}
 
 	// ------------------------------------ Accessor methods ------------------------------------

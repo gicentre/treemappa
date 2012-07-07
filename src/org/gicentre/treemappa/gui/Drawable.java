@@ -3,7 +3,7 @@ package org.gicentre.treemappa.gui;
 //*****************************************************************************************
 /** Defines the minimum functionality for a renderer to draw graphic primitives. 
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 15th January, 2012
+ *  @version 1.1, 7th July, 2012
  */ 
 //*****************************************************************************************
 
@@ -46,6 +46,18 @@ public interface Drawable
 	 *  @param h Height of the rectangle (but see modifications possible with rectMode())
 	 */
 	public abstract void rect(float x, float y, float w, float h);
+	
+	/** Should draw a curved rectangle using the given location and dimensions with a given radii of curvature in 
+	 *  the x and y directions. By default the x,y coordinates will be the top left of the rectangle, 
+	 *  but the meanings of these parameters should be able to be changed with Processing's rectMode() command.
+	 *  @param x x coordinate of the rectangle position
+	 *  @param y y coordinate of the rectangle position.
+	 *  @param w Width of the rectangle (but see modifications possible with rectMode())
+	 *  @param h Height of the rectangle (but see modifications possible with rectMode())
+	 *  @param rx Radius of curvature of the rectangle's corners in the horizontal direction.
+	 *  @param ry Radius of curvature of the rectangle's corners in the vertical direction.
+	 */
+	public abstract void rect(float x, float y, float w, float h, float rx, float ry);
 	
 	/** Should draw an ellipse using the given location and dimensions. By default the x,y coordinates
 	 *  will be centre of the ellipse, but the meanings of these parameters should be able to be 

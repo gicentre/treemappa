@@ -1,17 +1,16 @@
 package org.gicentre.tests;
 
-import java.awt.geom.Point2D;
-
-import org.gicentre.handy.HandyRenderer;
 import org.gicentre.treemappa.PTreeMappa;
-import org.gicentre.treemappa.gui.DrawableFactory;
+import org.gicentre.treemappa.TreeMapNode;
+import org.gicentre.treemappa.TreeMappa;
 import org.gicentre.utils.move.ZoomPan;
 import processing.core.PApplet;
 
 //  ****************************************************************************************
-/** Tests the Processing wrapper for the treeMappa classes.
+/** Creates a treemap programmatically. Tests the ability to pass data into a treemap without
+ *  reading files as well as custom appearance in Processing.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 17th January, 2012.
+ *  @version 1.0, 7th July, 2012.
  */ 
 //  ****************************************************************************************
 
@@ -30,7 +29,7 @@ import processing.core.PApplet;
  */
 
 @SuppressWarnings("serial")
-public class TreeMapProcessingTest extends PApplet
+public class TreeMapFromCodeTest extends PApplet
 {
 	// ------------------------------ Starter method ------------------------------- 
 
@@ -39,17 +38,17 @@ public class TreeMapProcessingTest extends PApplet
 	 */
 	public static void main(String[] args)
 	{   
-		PApplet.main(new String[] {"org.gicentre.tests.TreeMapProcessingTest"});
+		PApplet.main(new String[] {"org.gicentre.tests.TreeMapFromCodeTest"});
 	}
 
 	// ----------------------------- Object variables ------------------------------
 
 	private PTreeMappa pTreeMappa;    // Stores the treemap.
 	private ZoomPan zoomer;			  // Allows zooming and panning of the treemap.
-	private HandyRenderer handy;
+	
 	
 	// ---------------------------- Processing methods -----------------------------
-
+	
 	/** Initialises the sketch.
 	 */
 	public void setup()
@@ -58,41 +57,30 @@ public class TreeMapProcessingTest extends PApplet
 		smooth();
 		zoomer = new ZoomPan(this);
 
-		// Create an empty treemap.    
+		// Create the treemap.    
 		pTreeMappa = new PTreeMappa(this);
+		buildTreeMap();		
 		
-		// Create a sketchy renderer
-		handy = new HandyRenderer(this);
-		handy.setFillGap(2);
-		handy.setFillWeight(0.1f);
-		handy.setHachurePerturbationAngle(4);
-		handy.setRoughness(0.7f);
-		
-		// Load the data and build the treemap.
-		//pTreeMappa.readData("life.csv"); 
-		pTreeMappa.readData("londonBoroughs.csv");
-		//pTreeMappa.readData("londonWards.csv");
+		textFont(createFont("GeosansLight",8));
 		
 		// Customise the appearance of the treemap
 		pTreeMappa.getTreeMapPanel().setLeafMaxTextSize(24);
 		pTreeMappa.getTreeMapPanel().setBorders(6);					// Default border spacing 6 pixels
-		pTreeMappa.getTreeMapPanel().setBorder(1,3);				// Border spacing at level 1 is 3 pixels.
+		pTreeMappa.getTreeMapPanel().setShowBranchLabels(true);
+		pTreeMappa.getTreeMapPanel().setAllowVerticalLabels(true);
 		pTreeMappa.getTreeMapPanel().setShowLeafBorders(true);
 		pTreeMappa.getTreeMapPanel().setBorderWeights(2);			// Default border line thickness is 2 pixels
-		pTreeMappa.getTreeMapPanel().setBorderWeight(1,0);			// Do not display borders at level 1 (width of 0).
 		pTreeMappa.getTreeMapPanel().setLeafBorderWeight(2);		// Border round leaf nodes is 2 pixels.
-		pTreeMappa.getTreeMapPanel().setLeafBorderColour(color(0,100));
-		pTreeMappa.getTreeMapPanel().setShowBranchLabels(true);
-		pTreeMappa.getTreeMapPanel().setLayouts("spatial");
+		pTreeMappa.getTreeMapPanel().setLeafBorderColour(color(2,0));
+		pTreeMappa.getTreeMapPanel().setLayouts("orderedSquarified");
 		
-
-		// Layout needs updating because we have changed border size and the
-		// treemap layout algorithm.
+		// These are the Processing-specific customisation options.
+		pTreeMappa.setCurvature(9);									// Rounded rectangles.
+		pTreeMappa.setLeafTextAlignment(LEFT, BOTTOM);				// Place labels in the bottom-left corner of each leaf.
+		pTreeMappa.setBranchTextAlignment(CENTER, CENTER);
+	
+		// Layout needs updating because we have changed border size and the treemap layout algorithm.
 		pTreeMappa.getTreeMapPanel().updateLayout();
-		
-		// Make treeMappa use the sketchy renderer and a handwritten font.
-		textFont(createFont("DolceCaffe-Regular",40));
-		pTreeMappa.setRenderer(DrawableFactory.createHandyRenderer(handy));
 	}
 
 	/** Draws the sketch.
@@ -100,7 +88,6 @@ public class TreeMapProcessingTest extends PApplet
 	public void draw()
 	{   
 		background(255);
-		handy.setSeed(1001);
 		zoomer.transform();
 
 		// Get treeMappa to draw itself.
@@ -109,30 +96,6 @@ public class TreeMapProcessingTest extends PApplet
 		// Don't redraw unless instructed to do so.
 		noLoop();
 	}
-	
-	/** Displays pixel and geographic coordinates pointed to by mouse.
-	 */
-	@Override
-	public void mousePressed()
-	{
-		System.out.println("Mouse: "+mouseX+","+mouseY);
-		
-		Point2D pointInPixels, geoPoint;
-
-		pointInPixels = new Point2D.Double (mouseX, mouseY);
-		geoPoint = pTreeMappa.getTreeMapPanel().getPixelToGeo(pointInPixels);
-		
-		System.out.println("Geo: "+geoPoint.getX()+","+geoPoint.getY());
-		loop();
-	}
-
-	/** Updates the display whenever the mouse is moved.
-	 */
-	@Override
-	public void mouseMoved()
-	{
-		loop();
-	}
 
 	/** Updates the display whenever the mouse is dragged
 	 */
@@ -140,5 +103,28 @@ public class TreeMapProcessingTest extends PApplet
 	public void mouseDragged()
 	{
 		loop();
+	}
+	
+	// ------------------------------ Private methods ------------------------------
+	
+	private void buildTreeMap()
+	{
+		TreeMappa tm = pTreeMappa.getTreeMappa();
+		
+		// Create Root node
+		TreeMapNode root = new TreeMapNode("root");
+		tm.setRoot(root);
+		
+		root.add(new TreeMapNode("First Child\\nwith two lines"));
+		root.add(new TreeMapNode("Second Child with a longer\\ntext label"));
+		
+		
+		TreeMapNode child3 = new TreeMapNode("Third Child");
+		root.add(child3);
+		child3.add(new TreeMapNode("Grandchild A",8));
+		child3.add(new TreeMapNode("Grandchild B",5));
+		
+		// Update treemap with new data
+		pTreeMappa.buildTreeMap();		
 	}
 }
