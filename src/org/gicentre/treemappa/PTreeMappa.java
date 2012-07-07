@@ -163,7 +163,23 @@ public class PTreeMappa
 	    return pImage;
 	}
 	
-	/** Draws the treemap directly in the parent sketch. This is an alternative to calling createImage() 
+	/** Draws the treemap directly in the parent sketch at the given position and size.
+	 *  @param x Coordinate of the left hand side of the treemap in pixel units.
+	 *  @param y Coordinate of the top of the treemap in pixel units.
+	 *  @param w Width of the treemap in pixel units.
+	 *  @param h Height of the treemap in pixel units.
+	 */
+	public void draw(float x, float y, float w, float h)
+	{
+		parent.pushMatrix();
+
+		parent.translate(x,y);
+		parent.scale(w/tmPanel.getWidth(),h/tmPanel.getHeight());
+		draw();
+		parent.popMatrix();
+	}
+	
+	/** Draws the treemap directly in the parent sketch. This is an alternative to calling <code>createImage()</code> 
 	 *  and will use the currently selected font and stroke from the parent sketch. Treemap nodes are filled
 	 *  according to the colour rules set for the treemap.
 	 */

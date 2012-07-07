@@ -238,6 +238,38 @@ public class TreeMapPanel extends JPanel
 	}
 
 	// ------------------------ Methods ------------------------
+	
+	
+	/** Reports the size of the panel containing the treemap. This size will have been determined at the
+	 *  point the tree map was first built.
+	 *  @return Size in pixel units of the treemap panel.
+	 */
+	@Override
+	public Dimension getSize()
+	{
+		return new Dimension(screenImg.getWidth(),screenImg.getHeight());
+	}
+	
+	
+	/** Reports the width of the panel containing the treemap. This width will have been determined at the
+	 *  point the tree map was first built.
+	 *  @return Width in pixel units of the treemap panel.
+	 */
+	@Override
+	public int getWidth()
+	{
+		return screenImg.getWidth();
+	}
+	
+	/** Reports the height of the panel containing the treemap. This height will have been determined at the
+	 *  point the tree map was first built.
+	 *  @return Height in pixel units of the treemap panel.
+	 */
+	@Override
+	public int getHeight()
+	{
+		return screenImg.getHeight();
+	}
 
 	/** Draws the tree map nodes.
 	 *  @param g Graphics context in which to draw. 

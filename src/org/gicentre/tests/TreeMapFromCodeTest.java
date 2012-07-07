@@ -91,8 +91,8 @@ public class TreeMapFromCodeTest extends PApplet
 		zoomer.transform();
 
 		// Get treeMappa to draw itself.
-		pTreeMappa.draw();
-		
+		pTreeMappa.draw(50,40,width-100,height-80);
+				
 		// Don't redraw unless instructed to do so.
 		noLoop();
 	}
