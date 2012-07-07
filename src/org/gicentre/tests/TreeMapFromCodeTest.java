@@ -58,7 +58,7 @@ public class TreeMapFromCodeTest extends PApplet
 		zoomer = new ZoomPan(this);
 
 		// Create the treemap.    
-		pTreeMappa = new PTreeMappa(this);
+		pTreeMappa = new PTreeMappa(this,width-100,height-20);
 		buildTreeMap();		
 		
 		textFont(createFont("GeosansLight",8));
@@ -91,7 +91,7 @@ public class TreeMapFromCodeTest extends PApplet
 		zoomer.transform();
 
 		// Get treeMappa to draw itself.
-		pTreeMappa.draw(50,40,width-100,height-80);
+		pTreeMappa.draw(50,10,width-100,height-20);
 				
 		// Don't redraw unless instructed to do so.
 		noLoop();

@@ -56,12 +56,34 @@ public class PTreeMappa
 	{
 		this(parent,null);
 	}
+	
+	/** Creates an object capable of building and representing a treemap with the given default image dimensions.
+	 *  @param parent Sketch in which this treemap will be used.
+	 *  @param w Initial width of the treemap in screen coordinates. If 0, the width of the parent sketch is used.
+	 *  @param h Initial height of the treemap in screen coordinates. If 0, the height of the parent sketch is used.
+	 */
+	public PTreeMappa(PApplet parent, int w, int h)
+	{
+		this(parent,null,w,h);
+	}
 		
 	/** Creates a treemap from the details supplied in the given configuration file.
 	 *  @param parent Sketch in which this treemap will be used.
 	 *  @param configFileName Name of file containing the treemap configuration.
 	 */
 	public PTreeMappa(PApplet parent, String configFileName)
+	{
+		this(parent,configFileName,0,0);
+	}
+		
+	/** Creates a treemap of the given display dimensions from the details supplied in the given configuration file.
+	 *  If the given width and height values are greater than 0, they will override any provided by the configuration file.
+	 *  @param parent Sketch in which this treemap will be used.
+	 *  @param configFileName Name of file containing the treemap configuration.
+	 *  @param w Initial width of the treemap in screen coordinates. If 0, the width provided in the configuration file is used.
+	 *  @param h Initial height of the treemap in screen coordinates. If 0, the height provided in the configuration file is used.
+	 */
+	public PTreeMappa(PApplet parent, String configFileName, int w, int h)
 	{
 		this.parent = parent;
 		this.curveRadius = 0;
@@ -82,6 +104,16 @@ public class PTreeMappa
 		if (configStream != null)
 		{
 			props.load(configStream);
+		}
+		
+		// Set the treemap panel dimensions if not default.
+		if (w > 0)
+		{
+			treeMappa.getConfig().setParameter(TreeMapProperties.WIDTH, Integer.toString(w));
+		}
+		if (h > 0)
+		{
+			treeMappa.getConfig().setParameter(TreeMapProperties.HEIGHT, Integer.toString(h));
 		}
 	}
 	
