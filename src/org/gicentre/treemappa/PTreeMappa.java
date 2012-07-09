@@ -468,15 +468,6 @@ public class PTreeMappa
 					// Only use vertical text if it increases text size by at least 20% and is allowed.
 					if ((tmPanel.getAllowVerticalLabels()) && (vertScale > horizScale*1.2))
 					{
-						/* Rotate text about its centre (since this will produce a larger label)
-						double cx =  bounds.getX() + (bounds.getWidth()/2) - vertScale*((i+1)*lineHeight -totalHeight/2 -parent.textDescent());
-						double cy =  bounds.getY() + (bounds.getHeight()-(parent.textWidth(lines[i]))*vertScale)/2;
-
-						parent.translate((float)cx,(float)cy);
-						parent.rotate(PConstants.HALF_PI);
-						parent.scale((float)vertScale,(float)vertScale);
-						*/
-						
 						double cx,cy;						
 						int xAlign = leafAlignX;
 						int yAlign = leafAlignY;
@@ -708,7 +699,7 @@ public class PTreeMappa
 	}	
 	
 	// ------------------------------------ Private methods ------------------------------------
-	
+		
 	/** Creates a DOM from the inFile stored in TreeMappa's inFile property. This method uses the applet-safe
 	 *  Processing class XMLElement to read file.
 	 */
