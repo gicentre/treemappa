@@ -10,7 +10,7 @@ import processing.core.PApplet;
 /** Creates a treemap programmatically. Tests the ability to pass data into a treemap without
  *  reading files as well as custom appearance in Processing.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 7th July, 2012.
+ *  @version 1.0, 9th July, 2012.
  */ 
 //  ****************************************************************************************
 
@@ -75,7 +75,7 @@ public class TreeMapFromCodeTest extends PApplet
 		pTreeMappa.getTreeMapPanel().setLayouts("orderedSquarified");
 		
 		// These are the Processing-specific customisation options.
-		pTreeMappa.setCurvature(9);									// Rounded rectangles.
+		pTreeMappa.setCurvature(20);								// Rounded rectangles.
 		pTreeMappa.setLeafTextAlignment(LEFT, BOTTOM);				// Place labels in the bottom-left corner of each leaf.
 		pTreeMappa.setBranchTextAlignment(CENTER, CENTER);
 	

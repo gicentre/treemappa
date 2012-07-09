@@ -263,13 +263,16 @@ public class PTreeMappa
 				parent.stroke(tmPanel.getBorderColour().getRGB(),25);
 			}
 			
+			// Reduce curve radius for small rectangles.
+			float curve = (float)Math.min(curveRadius, Math.min(bounds.getWidth()/3,bounds.getHeight()/3));
+			
 			if (renderer == null)
 			{
-				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
+				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
 			}
 			else
 			{
-				renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
+				renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
 			}
 
 			// Draw leaf label.
@@ -561,13 +564,16 @@ public class PTreeMappa
 			{
 				parent.strokeWeight(borderWeight);	
 
+				// Reduce curve radius for small rectangles.
+				float curve = (float)Math.min(curveRadius, Math.min(bounds.getWidth()/3,bounds.getHeight()/3));
+				
 				if (renderer == null)
 				{
-					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
+					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
 				}
 				else
 				{
-					renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curveRadius,curveRadius);
+					renderer.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
 				}
 			}
 		}
