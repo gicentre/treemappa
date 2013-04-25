@@ -7,7 +7,7 @@ import java.util.*;
 /** Stores a list of objects each be associated with a location. Allows spatial queries of 
  *  the list (find closest item to (x,y)). 
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 24th February, 2011.
+ *  @version 3.2, 25th April, 2013.
  */ 
 //  ***************************************************************************************
 
@@ -29,8 +29,6 @@ public class LocationList
 {
 	// -------------------- Object and class variables -------------------
 
-	private static final long serialVersionUID = -6397433758641389862L;
-	
 	private Vector<LocatedObject> locations;
 	
 	// --------------------------- Constructor ---------------------------

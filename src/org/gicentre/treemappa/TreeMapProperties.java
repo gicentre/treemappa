@@ -14,7 +14,7 @@ import java.util.Properties;
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.1, 17th January, 2012.
+ *  @version 3.2, 17th January, 2012.
  */
 // ********************************************************************************************************
 

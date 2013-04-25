@@ -5,7 +5,7 @@ import java.io.File;
 //  **************************************************************************
 /** Class to read treeMappa command line parameters and start the application. 
   * @author Jo Wood, giCentre.
-  * @version 3.0, 23rd March, 2011.
+  * @version 3.2, 25th Apri, 2013.
   */ 
 //  **************************************************************************
 
@@ -35,11 +35,11 @@ public class TreeMapApp
     						   /** Current numeric version of treeMappa. */
     static final float VERSION = 3.0f;
                                /** Current string version of treeMappa. */
-    static final String VERSION_TEXT = "3.0.0";
+    static final String VERSION_TEXT = "3.2.0";
                                /** Last modified date. */
-    static final String DATE = "28th February, 2011";
+    static final String DATE = "25th April, 2013";
                                /** Copyright statement. */
-    static final String COPYRIGHT = "(c) Jo Wood, giCentre, 2008-11";
+    static final String COPYRIGHT = "(c) Jo Wood, giCentre, 2008-13";
     
 	/** Starts the tree map application.
       * @param args Command line arguments. See USAGE for details.

@@ -46,7 +46,7 @@ import org.gicentre.utils.colour.ColourTable;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.1, 21st April, 2012.
+ *  @version 3.2, 21st April, 2012.
  */
 // ***************************************************************************************************
 

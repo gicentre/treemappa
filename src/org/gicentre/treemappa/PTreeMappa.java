@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
 import org.gicentre.treemappa.gui.Drawable;
+import org.gicentre.treemappa.version.AbstractXML;
+import org.gicentre.treemappa.version.Ver15;
+import org.gicentre.treemappa.version.Ver20;
+import org.gicentre.treemappa.version.VersionHandler;
 import org.gicentre.utils.colour.ColourTable;
 import org.gicentre.utils.io.DOMProcessor;
 import org.w3c.dom.Node;
@@ -12,14 +16,13 @@ import org.w3c.dom.Node;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
-import processing.xml.XMLElement;
 
-//********************************************************************************
+//  ********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.1.1, 7th July, 2012.
+ *  @version 3.2, 25th April, 2013.
  */
-//  ******************************************************************************
+//  ********************************************************************************
 
 /* This file is part of the giCentre treeMappa library. treeMappa is free software: you can 
  * redistribute it and/or modify it under the terms of the GNU Lesser General Public License
@@ -46,6 +49,7 @@ public class PTreeMappa
 	private float curveRadius;				// Curve radius for rounded rectangles.
 	private int leafAlignX,leafAlignY;		// Text alignment of leaf labels.
 	private int branchAlignX,branchAlignY;	// Text alignment of leaf labels.
+	private VersionHandler versionHandler;	// To deal with difference between Processing 1.5.x and Processing 2.x.
 	
 	// -------------------------------------- Constructors --------------------------------------
 	
@@ -85,6 +89,19 @@ public class PTreeMappa
 	 */
 	public PTreeMappa(PApplet parent, String configFileName, int w, int h)
 	{
+		// Check to see which version of Processing we are using and create an appropriate version-dependent implementation.
+		
+		try
+		{
+			// Attempt to create a Processing 2.x version handler.
+			versionHandler = new Ver20(parent);
+		}
+		catch (Throwable e)
+		{
+			// If a Processing 2.x version handler failed, silently revert to a Processing 1.5 version
+			versionHandler = new Ver15(parent);
+		}
+		
 		this.parent = parent;
 		this.curveRadius = 0;
 		
@@ -268,7 +285,7 @@ public class PTreeMappa
 			
 			if (renderer == null)
 			{
-				parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
+				versionHandler.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve);
 			}
 			else
 			{
@@ -569,7 +586,7 @@ public class PTreeMappa
 				
 				if (renderer == null)
 				{
-					parent.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve,curve);
+					versionHandler.rect((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight(),curve);
 				}
 				else
 				{
@@ -711,7 +728,8 @@ public class PTreeMappa
 	 */
 	DOMProcessor createDOM()
 	{
-		XMLElement root = new XMLElement(parent,treeMappa.getConfig().getInFileName());
+		// The AbstractXML type is needed because Processing 1.5.x and Processing 2.x use different classes to represent XML objects.
+		AbstractXML root = versionHandler.createXML(parent,treeMappa.getConfig().getInFileName());
 		DOMProcessor dom = new DOMProcessor();
 		dom.addElement(root.getName());
 		copyXMLContents(root,dom.getElements(root.getName())[0],dom);
@@ -724,7 +742,7 @@ public class PTreeMappa
 	 * @param domNode Destination DOM node into which attributes and values copied.
 	 * @param dom Processor that handles the DOM creation.
 	 */
-	private void copyXMLContents(XMLElement xmle, Node domNode, DOMProcessor dom)
+	private void copyXMLContents(AbstractXML xmle, Node domNode, DOMProcessor dom)
 	{
 		// Copy node attributes
 		String[] attributes = xmle.listAttributes();
@@ -741,7 +759,7 @@ public class PTreeMappa
 		}
 		
 		// Copy node's children
-		for (XMLElement child : xmle.getChildren())
+		for (AbstractXML child : xmle.getChildren())
 		{
 			Node domChild = dom.addElement(child.getName(),domNode);
 			copyXMLContents(child,domChild,dom);

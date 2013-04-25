@@ -22,7 +22,7 @@ import java.nio.channels.*;
  *  </pre></code>
  *  You must supply the <code>moreRecords</code> and <code>getMyRecord()</code> logic.
  *  @author Ian Schneider with minor modifications by Jo Wood, giCentre.
- *  @version 3.0, 24th February, 2011.
+ *  @version 3.2.0, 24th February, 2011.
  */
 //  ************************************************************************************************
 

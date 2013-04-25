@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.1.1, 9th July, 2012.
+ *  @version 3.2, 9th July, 2012.
  */
 //  **************************************************************************
 
@@ -1730,7 +1730,6 @@ public class TreeMappa
 
 		double globalXMin = rect.getX() + 0.5*xInc;
 		double globalYMin = rect.getY() + 0.5*yInc; 
-		double totalNodeArea = 0;
 		int n=0;
 		double x,y;
 
@@ -1739,8 +1738,6 @@ public class TreeMappa
 		// a common spatial location should be ordered by distance from origin.
 		for (int i=0; i<nodes.size(); i++)
 		{   
-			totalNodeArea += nodes.get(i).getArea();
-
 			if (isHorizontal)
 			{
 				x = rect.getX() + ((i+0.5)*xInc)%rect.getWidth();

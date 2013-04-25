@@ -13,7 +13,7 @@ import org.gicentre.treemappa.TreeMapNode;
  *  containing the file offsets for the components that make up the geometry; and 
  *  <code><i>name</i>.dbf</code> containing the attributes.
   * @author Jo Wood, giCentre.
-  * @version 3.0, 24th February, 2011.
+  * @version 3.2.0, 24th February, 2011.
   */
 //  ***********************************************************************************************
 

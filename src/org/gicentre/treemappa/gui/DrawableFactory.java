@@ -5,7 +5,7 @@ package org.gicentre.treemappa.gui;
  *  external libraries to be used by treeMappa. It's main purpose is to allow sketchy
  *  graphics to be drawn with a HandyRenderer from the handy library.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.1, 7th July, 2012
+ *  @version 3.2, 7th July, 2012
  */ 
 // *****************************************************************************************
 

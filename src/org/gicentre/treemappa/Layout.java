@@ -1,11 +1,11 @@
 package org.gicentre.treemappa;
 
-// ***********************************************************************
+//  ***********************************************************************
 /** Represents the types of layout supported by the TreeMap application.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 23rd February, 2011.
+ *  @version 3.2, 23rd February, 2011.
  */ 
-// ***********************************************************************
+//  ***********************************************************************
 
 /* This file is part of the giCentre treeMappa library. treeMappa is free software: you can 
  * redistribute it and/or modify it under the terms of the GNU Lesser General Public License

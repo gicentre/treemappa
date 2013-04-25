@@ -7,7 +7,7 @@ import java.awt.geom.Rectangle2D;
 //***************************************************************************************************
 /** Class to represent a single node in a treemap.
  *  @author Jo Wood, giCentre.
- *  @version 3.0, 25th March, 2011.
+ *  @version 3.2, 25th March, 2011.
  */
 // ***************************************************************************************************
 

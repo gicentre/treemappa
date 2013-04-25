@@ -12,7 +12,7 @@ import java.nio.channels.*;
  *  under the GNU Lesser General Public License. That in turn is based on the original code in
  *  the GISToolkit project - <a href="http://gistoolkit.sourceforge.net">gistoolkit.sourceforge.net</a>.
  *  @author Geotools/GISToolkit modified by Jo Wood, giCentre.
- *  @version 3.0, 24th February, 2011.
+ *  @version 3.2.0, 24th February, 2011.
  */
 //  ****************************************************************************************************
 
