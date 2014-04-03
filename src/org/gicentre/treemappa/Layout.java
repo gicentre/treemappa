@@ -3,7 +3,7 @@ package org.gicentre.treemappa;
 //  ***********************************************************************
 /** Represents the types of layout supported by the TreeMap application.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 23rd February, 2011.
+ *  @version 3.2.1, 23rd February, 2011.
  */ 
 //  ***********************************************************************
 

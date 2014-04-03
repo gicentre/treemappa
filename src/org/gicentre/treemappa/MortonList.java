@@ -8,7 +8,7 @@ import java.util.Vector;
  *  using Morton ordering. The order of objects stored in this collection is assumed to be Morton. 
  *  Ordering can be <code>VERTICAL</code> (mirror 'N' shaped) or <code>HORIZONTAL</code> ('Z' shaped).
   * @author Jo Wood, giCentre.
-  * @version 3.2, 24th February, 2011.
+  * @version 3.2.1, 24th February, 2011.
   * @param <E> Type of object stored in the Morton ordered collection. 
   */ 
 //  **************************************************************************************************

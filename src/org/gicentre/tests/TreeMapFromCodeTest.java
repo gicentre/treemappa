@@ -2,6 +2,7 @@ package org.gicentre.tests;
 
 import org.gicentre.treemappa.PTreeMappa;
 import org.gicentre.treemappa.TreeMapNode;
+import org.gicentre.treemappa.TreeMapPanel;
 import org.gicentre.treemappa.TreeMappa;
 import org.gicentre.utils.move.ZoomPan;
 import processing.core.PApplet;
@@ -10,7 +11,7 @@ import processing.core.PApplet;
 /** Creates a treemap programmatically. Tests the ability to pass data into a treemap without
  *  reading files as well as custom appearance in Processing.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 9th July, 2012.
+ *  @version 3.2.1, 3rd April, 2013
  */ 
 //  ****************************************************************************************
 
@@ -64,20 +65,19 @@ public class TreeMapFromCodeTest extends PApplet
 		textFont(createFont("GeosansLight",8));
 		
 		// Customise the appearance of the treemap
-		pTreeMappa.getTreeMapPanel().setLeafMaxTextSize(24);
-		pTreeMappa.getTreeMapPanel().setBorders(6);					// Default border spacing 6 pixels
-		pTreeMappa.getTreeMapPanel().setShowBranchLabels(true);
-		pTreeMappa.getTreeMapPanel().setAllowVerticalLabels(true);
-		pTreeMappa.getTreeMapPanel().setShowLeafBorders(true);
-		pTreeMappa.getTreeMapPanel().setBorderWeights(2);			// Default border line thickness is 2 pixels
-		pTreeMappa.getTreeMapPanel().setLeafBorderWeight(2);		// Border round leaf nodes is 2 pixels.
-		pTreeMappa.getTreeMapPanel().setLeafBorderColour(color(2,0));
-		pTreeMappa.getTreeMapPanel().setLayouts("orderedSquarified");
-		
-		// These are the Processing-specific customisation options.
-		pTreeMappa.setCurvature(20);								// Rounded rectangles.
-		pTreeMappa.setLeafTextAlignment(LEFT, BOTTOM);				// Place labels in the bottom-left corner of each leaf.
-		pTreeMappa.setBranchTextAlignment(CENTER, CENTER);
+		TreeMapPanel tmPanel = pTreeMappa.getTreeMapPanel();
+		tmPanel.setLeafMaxTextSize(24);
+		tmPanel.setBorders(6);							// Default border spacing 6 pixels
+		tmPanel.setShowBranchLabels(true);
+		tmPanel.setAllowVerticalLabels(true);
+		tmPanel.setShowLeafBorders(true);
+		tmPanel.setBorderWeights(2);					// Default border line thickness is 2 pixels
+		tmPanel.setLeafBorderWeight(2);					// Border round leaf nodes is 2 pixels.
+		tmPanel.setLeafBorderColour(color(2,0));
+		tmPanel.setLayouts("orderedSquarified");
+		tmPanel.setCurvature(20);						// Rounded rectangles.
+		tmPanel.setLeafTextAlignment(LEFT, BOTTOM);		// Place labels in the bottom-left corner of each leaf.
+		tmPanel.setBranchTextAlignment(CENTER, CENTER);
 	
 		// Layout needs updating because we have changed border size and the treemap layout algorithm.
 		pTreeMappa.getTreeMapPanel().updateLayout();

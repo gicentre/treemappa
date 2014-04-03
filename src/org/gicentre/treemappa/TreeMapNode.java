@@ -12,7 +12,7 @@ import javax.swing.tree.*;
  *  the size of the node, a numeric value representing the colour of the node and the sum of numeric
  *  size values below it in the tree.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 7th July, 2012
+ *  @version 3.2.1, 7th July, 2012
  */ 
 // ****************************************************************************************************
 

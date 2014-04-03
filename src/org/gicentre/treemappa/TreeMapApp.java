@@ -5,7 +5,7 @@ import java.io.File;
 //  **************************************************************************
 /** Class to read treeMappa command line parameters and start the application. 
   * @author Jo Wood, giCentre.
-  * @version 3.2, 25th Apri, 2013.
+  * @version 3.2.1, 3rd April, 2014.
   */ 
 //  **************************************************************************
 
@@ -32,14 +32,8 @@ public class TreeMapApp
 								/** Maximum hierarchy depth supported by TreeMappa. */
 	static final int MAX_DEPTH = 20;
 	
-    						   /** Current numeric version of treeMappa. */
-    static final float VERSION = 3.0f;
-                               /** Current string version of treeMappa. */
-    static final String VERSION_TEXT = "3.2.0";
-                               /** Last modified date. */
-    static final String DATE = "25th April, 2013";
                                /** Copyright statement. */
-    static final String COPYRIGHT = "(c) Jo Wood, giCentre, 2008-13";
+    static final String COPYRIGHT = "(c) Jo Wood, giCentre, 2008-14";
     
 	/** Starts the tree map application.
       * @param args Command line arguments. See USAGE for details.
@@ -58,8 +52,8 @@ public class TreeMapApp
        	    if ((command.equalsIgnoreCase("version")) || (command.equalsIgnoreCase("-version")))
        	    {
        	    	// 'version' is the only option that does not require an argument.
-   	    		System.out.println("treeMappa "+VERSION_TEXT);
-   	    		System.out.println(DATE+" "+COPYRIGHT);
+   	    		System.out.println("treeMappa "+Version.getText());
+   	    		System.out.println(COPYRIGHT);
    	    		return;
        	    }
        	    if (i >= args.length-1)

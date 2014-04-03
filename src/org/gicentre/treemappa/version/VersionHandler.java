@@ -6,7 +6,7 @@ import processing.core.PApplet;
 /** Interface describing Processing version neutral versions of methods that are 
  *  incompatible between Processing 1.x and 2.x. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 25th April, 2013.
+ *  @version 3.2.1, 25th April, 2013.
  */
 //  ********************************************************************************
 

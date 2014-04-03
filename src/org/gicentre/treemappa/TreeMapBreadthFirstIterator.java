@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
 //****************************************************************************************************
 /** Iterates over part of a tree map hierarchy using a breadth-first traversal.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 23rd February 2011.
+ *  @version 3.2.1, 23rd February 2011.
  */ 
 // ****************************************************************************************************
 

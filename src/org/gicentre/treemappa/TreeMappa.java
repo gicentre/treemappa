@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 9th July, 2012.
+ *  @version 3.2.1, 9th July, 2012.
  */
 //  **************************************************************************
 

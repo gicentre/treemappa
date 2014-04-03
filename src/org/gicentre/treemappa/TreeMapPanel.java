@@ -46,7 +46,7 @@ import org.gicentre.utils.colour.ColourTable;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 21st April, 2012.
+ *  @version 3.2.1, 3rd April, 2014.
  */
 // ***************************************************************************************************
 
@@ -78,41 +78,44 @@ public class TreeMapPanel extends JPanel
 	Point clickPosition;         	// Mouse position since last dragged position.
 
 	Point oldPosition;
-	int mode;                  	// Type of interaction mode.
-	private TreeMappa treeMappa;		// TreeMappa object capable of recalculating treemap geometry.
+	int mode;                  	        	// Type of interaction mode.
+	private TreeMappa treeMappa;			// TreeMappa object capable of recalculating treemap geometry.
 
-	private Font leafFont;				// Label fonts.
+	private Font leafFont;					// Label fonts.
 	private Font[] branchFonts;
-	private boolean isTransparent;		// Determines whether or not transparent colours are used in rendering.
-	private int randColourLevel;		// The level at which the evolutionary colour mutation starts.
+	private boolean isTransparent;			// Determines whether or not transparent colours are used in rendering.
+	private int randColourLevel;			// The level at which the evolutionary colour mutation starts.
 	private boolean allowVerticalLabels;
 	private Color borderColour;
+	private float curveRadius;				// Curve radius for rounded rectangles.
 	private Color[] branchTextColours;
-	private float[] borderWeights;		// Line thickness of borders at each level.
+	private float[] borderWeights;			// Line thickness of borders at each level.
 	private float leafBorderWeight;
 	private Color leafTextColour,leafBorderColour;
 	private float mutation;
 	private boolean showArrowHead;
 	private boolean[] showBranchDisplacements;
 	private boolean showBranchLabels;
+	private int leafAlignX,leafAlignY;		// Text alignment of leaf labels.
+	private int branchAlignX,branchAlignY;	// Text alignment of leaf labels.
 	private boolean showLeafDisplacement;
 	private boolean showLeafLabels;
 
-	private Random rand;				// For random colour mutation.
-	private Vector<Float>[] hues;		// For base colours in evolutionary colour scheme.
+	private Random rand;					// For random colour mutation.
+	private Vector<Float>[] hues;			// For base colours in evolutionary colour scheme.
 	private float hue;
 	private Vector<NodePanel> leaves,branches;
-	private ColourTable cTable;			// For file-based colour table.
-	private double rootArea;			// Area of the root rectangle in the treemap.
-	private int maxDepth;				// Maximum depth of the tree.
+	private ColourTable cTable;				// For file-based colour table.
+	private double rootArea;				// Area of the root rectangle in the treemap.
+	private int maxDepth;					// Maximum depth of the tree.
 
 	//private boolean isZooming;
 
-	private float maxLeafText;			// Largest text size for leaf labels (point size or 0 for no max)
-	private float[] maxBranchTexts;		// Largest text size for non-leaf labels (point size or 0 for no max)
+	private float maxLeafText;				// Largest text size for leaf labels (point size or 0 for no max)
+	private float[] maxBranchTexts;			// Largest text size for non-leaf labels (point size or 0 for no max)
 
-	private AffineTransform trans,    	// Georef to pixel transformation.
-						    iTrans;    	// Pixel to georef transformation.
+	private AffineTransform trans,    		// Georeferenced to pixel transformation.
+						    iTrans;    		// Pixel to georeferenced transformation.
 
 	Point2D.Float panOffset;
 
@@ -155,6 +158,8 @@ public class TreeMapPanel extends JPanel
 		buildBranchFonts(props.getBranchTextFonts());
 
 		leafVectorWidth = props.getLeafVectorWidth();	
+		branchAlignX = props.getBranchAlignX();
+		branchAlignY = props.getBranchAlignY();
 		isTransparent= props.getIsTransparent();
 		randColourLevel = props.getRandColourLevel();
 		randColourLevel = props.getRandColourLevel();
@@ -162,6 +167,9 @@ public class TreeMapPanel extends JPanel
 		borderColour = props.getBorderColour();
 		borderWeights = props.getBorderWeights();
 		branchTextColours = props.getBranchTextColours();
+		curveRadius = props.getCurveRadius();
+		leafAlignX = props.getLeafAlignX();
+		leafAlignY = props.getLeafAlignY();
 		leafTextColour = props.getLeafTextColour();
 		leafBorderColour = props.getLeafBorderColour();
 		leafBorderWeight = props.getLeafBorderWeight();
@@ -828,6 +836,38 @@ public class TreeMapPanel extends JPanel
 		return leafBorderWeight;
 	}
 
+	/** Provides the Processing leaf text horizontal alignment type, one of the Processing codes LEFT, CENTER or RIGHT.
+	 *  @return Horizontal leaf text alignment.
+	 */
+	public int getLeafAlignX()
+	{
+		return leafAlignX;
+	}
+	
+	/** Provides the Processing leaf text vertical alignment type, one of the Processing codes TOP, CENTER or BOTTOM.
+	 *  @return Vertical leaf text alignment.
+	 */
+	public int getLeafAlignY()
+	{
+		return leafAlignY;
+	}
+	
+	/** Provides the Processing branch text horizontal alignment type, one of the Processing codes LEFT, CENTER or RIGHT.
+	 *  @return Horizontal branch text alignment.
+	 */
+	public int getBranchAlignX()
+	{
+		return branchAlignX;
+	}
+	
+	/** Provides the Processing branch text vertical alignment type, one of the Processing codes TOP, CENTER or BOTTOM.
+	 *  @return Vertical branch text alignment.
+	 */
+	public int getBranchAlignY()
+	{
+		return branchAlignY;
+	}
+	
 	/** Reports the maximum depth of the hierarchy.
 	 *  @return maximum depth of the hierarchy.
 	 */
@@ -1304,6 +1344,15 @@ public class TreeMapPanel extends JPanel
 		this.cTable = cTable;
 		return true;
 	}
+	
+	/** Sets the curvature radius of rounded rectangles. If 0, normal rectangles with sharp corners are
+	 *  drawn in the treemap. Values greater than 0 increase the curviness of the rectangles.
+	 *  @param curveRadius Radius of curvature of treemap rectangle corners in pixel units.
+	 */
+	public void setCurvature(float curveRadius)
+	{
+		this.curveRadius = Math.max(0,curveRadius);
+	}
 
 	/** Sets whether or not transparency is used to when drawing the treemap. This can be useful when
 	 *  creating PDF images that cannot display transparent colours correctly. Note that the treemap 
@@ -1329,6 +1378,34 @@ public class TreeMapPanel extends JPanel
 		treeMappa.getConfig().setParameter("labelBranches", showLabels?"true":"false");
 		return true;
 	}
+	
+	/** Determines the text alignment of leaf labels. This only has an effect when displaying treemaps in
+	 *  Processing via the PTreeMAppa class. Note that the treemap will not use this new setting until a call 
+	 *  to <code>updateImage()</code> is made.
+	 *  @param alignX Processing code for horizontal text alignment. Should be one of LEFT, CENTER  or RIGHT.
+	 *  @param alignY Processing code for vertical text alignment. Should be one of TOP, CENTER  or BOTTOM.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setLeafTextAlignment(int alignX, int alignY)
+	{
+		leafAlignX = alignX;
+		leafAlignY = alignY;
+		return true;
+	}
+	
+	/** Determines the text alignment of branch labels. This only has an effect when displaying treemaps in
+	 *  Processing via the PTreeMAppa class. Note that the treemap will not use this new setting until a call 
+	 *  to <code>updateImage()</code> is made.
+	 *  @param alignX Processing code for horizontal text alignment. Should be one of LEFT, CENTER  or RIGHT.
+	 *  @param alignY Processing code for vertical text alignment. Should be one of TOP, CENTER  or BOTTOM.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setBranchTextAlignment(int alignX, int alignY)
+	{
+		branchAlignX = alignX;
+		branchAlignY = alignY;
+		return true;
+	}
 
 	/** Determines whether or not leaf labels are to be displayed. Note that the treemap 
 	 *  will not use this new setting until a call to <code>updateImage()</code> is made.
@@ -1350,6 +1427,15 @@ public class TreeMapPanel extends JPanel
 		return cTable;
 	}
 
+	/** Reports the curvature radius of rounded rectangles. If 0, normal rectangles with sharp corners are
+	 *  drawn in the treemap. Values greater than 0 increase the curviness of the rectangles.
+	 *  @return Radius of curvature of treemap rectangle corners in pixel units.
+	 */
+	public float getCurvature()
+	{
+		return curveRadius;
+	}
+	
 	// ------------------ Requests that change the tree layout but not the tree structure
 
 	/** Sets the alignment settings for all levels within the treemap. Note that since this operation
@@ -1362,7 +1448,7 @@ public class TreeMapPanel extends JPanel
 	{
 		return treeMappa.setAlignments(alignment);
 	}
-
+	
 	/** Sets the alignment setting for the given level of the treemap. Note that since this operation
 	 *  requires the recalculation of the treemap layout, no changes will be made until <code>updateLayout()</code>
 	 *  is called.

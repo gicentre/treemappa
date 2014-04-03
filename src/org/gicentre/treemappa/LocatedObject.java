@@ -5,7 +5,7 @@ import java.awt.geom.Point2D;
 //  *********************************************************************
 /** Stores a 2D location which can be attached to any object.
   * @author Jo Wood. giCentre.
-  * @version 3.2, 25th March, 2011.
+  * @version 3.2.1, 25th March, 2011.
   */ 
 //  *********************************************************************
 

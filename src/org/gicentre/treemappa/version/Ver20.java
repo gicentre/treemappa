@@ -5,7 +5,7 @@ import processing.core.PApplet;
 //***************************************************************************************
 /** Provides a Processing 2.0 compatible implementation of the version-neutral interface.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 25th April, 2013.
+ *  @version 3.2.1, 25th April, 2013.
  */
 // **************************************************************************************
 

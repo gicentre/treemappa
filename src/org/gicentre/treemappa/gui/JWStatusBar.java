@@ -10,7 +10,7 @@ import java.util.List;
 //  ***********************************************************************************************
 /** Creates status bar for displaying messages and progress. 
   * @author Jo Wood
-  * @version 3.2, 23rd February, 2011.
+  * @version 3.2.1, 23rd February, 2011.
   */
 //  ***********************************************************************************************
 

@@ -3,7 +3,7 @@ package org.gicentre.treemappa.version;
 //  ******************************************************************************
 /** Interface describing a Processing version-neutral XML class. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 25th April, 2013.
+ *  @version 3.2.1, 25th April, 2013.
  */
 //  ******************************************************************************
 

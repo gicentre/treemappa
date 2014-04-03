@@ -11,7 +11,7 @@ import processing.core.PApplet;
 //  ****************************************************************************************
 /** Tests the Processing wrapper for the treeMappa classes.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 1.0, 17th January, 2012.
+ *  @version 3.2.1, 3rd April, 2014.
  */ 
 //  ****************************************************************************************
 
@@ -55,7 +55,6 @@ public class TreeMapProcessingTest extends PApplet
 	public void setup()
 	{   
 		size(1200,800);
-		smooth();
 		zoomer = new ZoomPan(this);
 
 		// Create an empty treemap.    
@@ -86,8 +85,7 @@ public class TreeMapProcessingTest extends PApplet
 		pTreeMappa.getTreeMapPanel().setLayouts("spatial");
 		
 
-		// Layout needs updating because we have changed border size and the
-		// treemap layout algorithm.
+		// Layout needs updating because we have changed border size and the treemap layout algorithm.
 		pTreeMappa.getTreeMapPanel().updateLayout();
 		
 		// Make treeMappa use the sketchy renderer and a handwritten font.

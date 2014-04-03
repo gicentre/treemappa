@@ -17,7 +17,7 @@ import java.net.*;             // For icon handling.
  *  necessary. This icon should be located at images/blank.gif in the classpath of the VM that uses 
  *  this class.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 23rd March, 2011.
+ *  @version 3.2.1, 23rd March, 2011.
  */
 //  ***************************************************************************************************
 

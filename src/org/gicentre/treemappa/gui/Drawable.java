@@ -3,7 +3,7 @@ package org.gicentre.treemappa.gui;
 //*****************************************************************************************
 /** Defines the minimum functionality for a renderer to draw graphic primitives. 
  *  @author Jo Wood, giCentre, City University London.
- *  @version 3.2, 7th July, 2012
+ *  @version 3.2.1, 7th July, 2012
  */ 
 //*****************************************************************************************
 

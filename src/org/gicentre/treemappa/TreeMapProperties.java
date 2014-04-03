@@ -14,7 +14,7 @@ import java.util.Properties;
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.2, 17th January, 2012.
+ *  @version 3.2.1, 3rd April, 2014.
  */
 // ********************************************************************************************************
 
@@ -30,7 +30,10 @@ public class TreeMapProperties
 	static final String BORDER				= "border";
 	static final String BORDER_COLOUR		= "borderColour";
 	static final String BORDER_WEIGHT		= "borderWeight";
+	static final String BRANCH_ALIGN_X      = "branchAlignX";
+	static final String BRANCH_ALIGN_Y      = "branchAlignY";
 	static final String COLOUR_TABLE		= "cTable";
+	static final String CURVE_RADIUS		= "curveRadius";
 	static final String FILE_TYPE			= "type";
 	static final String HEIGHT				= "height";
 	static final String IMAGE_FILE 			= "imageFile";
@@ -38,6 +41,8 @@ public class TreeMapProperties
 	static final String LABEL_BRANCHES		= "labelBranches";
 	static final String LABEL_LEAVES		= "labelLeaves";
 	static final String LAYOUT	 			= "layout";
+	static final String LEAF_ALIGN_X        = "leafAlignX";
+	static final String LEAF_ALIGN_Y        = "leafAlignY";
 	static final String LEAF_BORDER_COLOUR	= "leafBorderColour";
 	static final String LEAF_BORDER_WEIGHT	= "leafBorderWeight";
 	static final String LEAF_TEXT_COLOUR	= "leafTextColour";
@@ -186,6 +191,20 @@ public class TreeMapProperties
 			}
 			properties.setProperty(key.toLowerCase(), value);
 		}
+		else if ((key.equalsIgnoreCase(LEAF_ALIGN_X)) || (key.equalsIgnoreCase(LEAF_ALIGN_Y)) ||
+				(key.equalsIgnoreCase(BRANCH_ALIGN_X)) || (key.equalsIgnoreCase(BRANCH_ALIGN_Y)))
+		{
+			try
+			{
+				Integer.parseInt(value);
+			}
+			catch (NumberFormatException e)
+			{
+				System.err.println("Cannot extract numeric value '"+value+"' from  ' "+key+"'.");
+				return false;
+			}
+			properties.setProperty(key.toLowerCase(), value);
+		}
 		else if (key.equalsIgnoreCase(RAND_COLOUR_LEVEL))
 		{
 			try
@@ -223,8 +242,9 @@ public class TreeMapProperties
 			properties.setProperty(key.toLowerCase(), value);
 		}
 		else if ((key.equalsIgnoreCase(WIDTH)) || (key.equalsIgnoreCase(HEIGHT)) || 
-				(key.equalsIgnoreCase(MAX_LEAF_TEXT)) || (key.equalsIgnoreCase(LEAF_VECTOR_WIDTH)) ||
-				(key.equalsIgnoreCase(LEAF_BORDER_WEIGHT)))
+				 (key.equalsIgnoreCase(MAX_LEAF_TEXT)) || (key.equalsIgnoreCase(LEAF_VECTOR_WIDTH)) ||
+				 (key.equalsIgnoreCase(LEAF_BORDER_WEIGHT)) || 
+				 (key.equalsIgnoreCase(CURVE_RADIUS)))
 		{
 			try
 			{
@@ -643,6 +663,31 @@ public class TreeMapProperties
 	{
 		return getHexColour(properties.getProperty(BORDER_COLOUR.toLowerCase()));
 	}
+	
+	/** Provides the Processing branch text horizontal alignment type, one of LEFT, CENTER or RIGHT.
+	 *  @return Horizontal branch text alignment.
+	 */
+	public int getBranchAlignX()
+	{
+		return Integer.parseInt(properties.getProperty(BRANCH_ALIGN_X.toLowerCase()));
+	}
+	
+	/** Provides the Processing branch text vertical alignment type, one of TOP, CENTER or BOTTOM.
+	 *  @return Vertical branch text alignment.
+	 */
+	public int getBranchAlignY()
+	{
+		return Integer.parseInt(properties.getProperty(BRANCH_ALIGN_Y.toLowerCase()));
+	}
+	
+	/** Provides the curvature radius for rectangles. A value of 0 indicates sharp-cornered rectangles with larger
+	 *  values representing increasingly curved shapes.
+	 *  @return Radius of rectangle corner curves pixels.
+	 */
+	public float getCurveRadius()
+	{
+		return Float.parseFloat(properties.getProperty(CURVE_RADIUS.toLowerCase()));
+	}
 
 	/** Provides the width of the treemap in pixels.
 	 *  @return Width of the treemap in pixels.
@@ -683,7 +728,22 @@ public class TreeMapProperties
 	{
 		return Float.parseFloat(properties.getProperty(MUTATION.toLowerCase()));
 	}
-
+	
+	/** Provides the Processing leaf text horizontal alignment type, one of LEFT, CENTER or RIGHT.
+	 *  @return Horizontal leaf text alignment.
+	 */
+	public int getLeafAlignX()
+	{
+		return Integer.parseInt(properties.getProperty(LEAF_ALIGN_X.toLowerCase()));
+	}
+	
+	/** Provides the Processing leaf text vertical alignment type, one of TOP, CENTER or BOTTOM.
+	 *  @return Vertical leaf text alignment.
+	 */
+	public int getLeafAlignY()
+	{
+		return Integer.parseInt(properties.getProperty(LEAF_ALIGN_Y.toLowerCase()));
+	}
 
 	/** Provides the file type used for defining the hierarchy.
 	 *  @return Type of file format used to represent hierarchy.
@@ -836,11 +896,16 @@ public class TreeMapProperties
 		properties.setProperty(BORDER.toLowerCase(),"1");
 		properties.setProperty(BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(BORDER_COLOUR.toLowerCase(),"#000000");
+		properties.setProperty(BRANCH_ALIGN_X.toLowerCase(),"3");		// Processing 'CENTER' code.
+		properties.setProperty(BRANCH_ALIGN_Y.toLowerCase(),"3");		// Processing 'CENTER' code.
+		properties.setProperty(CURVE_RADIUS.toLowerCase(),"0");
 		properties.setProperty(HEIGHT.toLowerCase(),"400");
 		properties.setProperty(LABEL_BRANCHES.toLowerCase(),"false");
 		properties.setProperty(LABEL_LEAVES.toLowerCase(),"true");
 		properties.setProperty(LAYOUT.toLowerCase(),"orderedSquarified");
 		properties.setProperty(SHOW_LEAF_BORDER.toLowerCase(),"false");
+		properties.setProperty(LEAF_ALIGN_X.toLowerCase(),"3");		// Processing 'CENTER' code.
+		properties.setProperty(LEAF_ALIGN_Y.toLowerCase(),"3");		// Processing 'CENTER' code.
 		properties.setProperty(LEAF_BORDER_COLOUR.toLowerCase(),"#000000");
 		properties.setProperty(LEAF_BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(LEAF_TEXT_COLOUR.toLowerCase(),"#00000096");
