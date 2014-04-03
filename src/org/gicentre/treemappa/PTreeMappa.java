@@ -736,6 +736,12 @@ public class PTreeMappa
 	 */
 	private void copyXMLContents(AbstractXML xmle, Node domNode, DOMProcessor dom)
 	{
+		// Nothing to copy if this element is some text.
+		if (xmle.getName().equals("#text"))
+		{
+			return;
+		}
+
 		// Copy node attributes
 		String[] attributes = xmle.listAttributes();
 		for (String attribute : attributes)
