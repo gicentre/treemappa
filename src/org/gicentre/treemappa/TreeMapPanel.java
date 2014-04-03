@@ -1927,7 +1927,7 @@ public class TreeMapPanel extends JPanel
 			// Write out object metadata.
 			writeLine("<!-- Object metadata -->", outFile);
 			writeLine("<title>Tree map</title>", outFile);
-			writeLine("<desc>Produced by treeMapps "+TreeMapApp.VERSION_TEXT+"</desc>", outFile);
+			writeLine("<desc>Produced by treeMappa "+Version.getText()+"</desc>", outFile);
 			writeLine("",outFile);
 
 			// Write out georeference to pixel transform and title.

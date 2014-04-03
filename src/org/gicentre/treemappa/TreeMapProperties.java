@@ -439,7 +439,7 @@ public class TreeMapProperties
 		 */	
 		try
 		{
-			properties.storeToXML(new FileOutputStream(fileName),"TreeMappa "+TreeMapApp.VERSION_TEXT+", "+TreeMapApp.DATE+" configuration.");
+			properties.storeToXML(new FileOutputStream(fileName),"TreeMappa "+Version.getText()+" configuration.");
 		}
 		catch (IOException e)
 		{
