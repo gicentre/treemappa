@@ -7,14 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.InvalidPropertiesFormatException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 // ********************************************************************************************************
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.2.1, 6th April, 2014.
  */
 // ********************************************************************************************************
 
@@ -24,6 +27,7 @@ public class TreeMapProperties
 
 	private Properties properties;			// Properties object used for storing all configuration
 	private String configFileName;			// Used to indicate these properties are to be saved to file.
+	private Map<String,Help>help;			// Description of each option for reporting help text.
 
 	static final String ALIGN 				= "align";
 	static final String ALLOW_VERTICAL 		= "allowVerticalLabels";
@@ -36,8 +40,10 @@ public class TreeMapProperties
 	static final String CURVE_RADIUS		= "curveRadius";
 	static final String FILE_TYPE			= "type";
 	static final String HEIGHT				= "height";
+	static final String HELP                = "help";				// Not stored in a properties file since no parameters.
 	static final String IMAGE_FILE 			= "imageFile";
 	static final String IN_FILE 			= "inFile";
+	static final String LOAD_CONFIG			= "loadConfig";			// Not stored in a properties file.
 	static final String LABEL_BRANCHES		= "labelBranches";
 	static final String LABEL_LEAVES		= "labelLeaves";
 	static final String LAYOUT	 			= "layout";
@@ -68,6 +74,7 @@ public class TreeMapProperties
 	static final String USE_LABELS			= "useLabels";
 	static final String VECTOR_WIDTH		= "vectorWidth";
 	static final String VERBOSE				= "verbose";
+	static final String VERSION				= "version";			// Not stored in a properties file since no parameters. 
 	static final String WIDTH				= "width";
 
 
@@ -191,19 +198,30 @@ public class TreeMapProperties
 			}
 			properties.setProperty(key.toLowerCase(), value);
 		}
-		else if ((key.equalsIgnoreCase(LEAF_ALIGN_X)) || (key.equalsIgnoreCase(LEAF_ALIGN_Y)) ||
-				(key.equalsIgnoreCase(BRANCH_ALIGN_X)) || (key.equalsIgnoreCase(BRANCH_ALIGN_Y)))
+		else if ((key.equalsIgnoreCase(LEAF_ALIGN_X)) || (key.equalsIgnoreCase(BRANCH_ALIGN_X)))
+				
 		{
-			try
+			if ((value.equalsIgnoreCase("left")) || (value.equalsIgnoreCase("center")) || (value.equalsIgnoreCase("right")))
 			{
-				Integer.parseInt(value);
+				properties.setProperty(key.toLowerCase(), value);
 			}
-			catch (NumberFormatException e)
+			else
 			{
-				System.err.println("Cannot extract numeric value '"+value+"' from  ' "+key+"'.");
+				System.err.println("Invalid option for '"+key+"' ("+value+"). Valid options are 'left', 'center', 'right'.");
 				return false;
 			}
-			properties.setProperty(key.toLowerCase(), value);
+		}
+		else if ((key.equalsIgnoreCase(LEAF_ALIGN_Y)) || (key.equalsIgnoreCase(BRANCH_ALIGN_Y)))
+		{
+			if ((value.equalsIgnoreCase("top")) || (value.equalsIgnoreCase("center")) || (value.equalsIgnoreCase("bottom")))
+			{
+				properties.setProperty(key.toLowerCase(), value);
+			}
+			else
+			{
+				System.err.println("Invalid option for '"+key+"' ("+value+"). Valid options are 'top', 'center', 'bottom'.");
+				return false;
+			}
 		}
 		else if (key.equalsIgnoreCase(RAND_COLOUR_LEVEL))
 		{
@@ -456,8 +474,7 @@ public class TreeMapProperties
 	}
 
 	/** Loads a set of treemappa configuration options from an XML file with the given name.
-	 *  The options all have defaults so the configuration file need only contain non-default
-	 *  options.
+	 *  The options all have defaults so the configuration file need only contain non-default options.
 	 *  @param fileName Name of XML file from which to retrieve the treemappa configuration.
 	 *  @return True if configuration file loaded without problems.
 	 */
@@ -667,17 +684,17 @@ public class TreeMapProperties
 	/** Provides the Processing branch text horizontal alignment type, one of LEFT, CENTER or RIGHT.
 	 *  @return Horizontal branch text alignment.
 	 */
-	public int getBranchAlignX()
+	public String getBranchAlignX()
 	{
-		return Integer.parseInt(properties.getProperty(BRANCH_ALIGN_X.toLowerCase()));
+		return properties.getProperty(BRANCH_ALIGN_X.toLowerCase());
 	}
 	
 	/** Provides the Processing branch text vertical alignment type, one of TOP, CENTER or BOTTOM.
 	 *  @return Vertical branch text alignment.
 	 */
-	public int getBranchAlignY()
+	public String getBranchAlignY()
 	{
-		return Integer.parseInt(properties.getProperty(BRANCH_ALIGN_Y.toLowerCase()));
+		return properties.getProperty(BRANCH_ALIGN_Y.toLowerCase());
 	}
 	
 	/** Provides the curvature radius for rectangles. A value of 0 indicates sharp-cornered rectangles with larger
@@ -732,17 +749,17 @@ public class TreeMapProperties
 	/** Provides the Processing leaf text horizontal alignment type, one of LEFT, CENTER or RIGHT.
 	 *  @return Horizontal leaf text alignment.
 	 */
-	public int getLeafAlignX()
+	public String getLeafAlignX()
 	{
-		return Integer.parseInt(properties.getProperty(LEAF_ALIGN_X.toLowerCase()));
+		return properties.getProperty(LEAF_ALIGN_X.toLowerCase());
 	}
 	
 	/** Provides the Processing leaf text vertical alignment type, one of TOP, CENTER or BOTTOM.
 	 *  @return Vertical leaf text alignment.
 	 */
-	public int getLeafAlignY()
+	public String getLeafAlignY()
 	{
-		return Integer.parseInt(properties.getProperty(LEAF_ALIGN_Y.toLowerCase()));
+		return properties.getProperty(LEAF_ALIGN_Y.toLowerCase());
 	}
 
 	/** Provides the file type used for defining the hierarchy.
@@ -752,7 +769,6 @@ public class TreeMapProperties
 	{
 		return properties.getProperty(FILE_TYPE.toLowerCase());
 	}
-
 
 	/** Provides the name of the file used for defining the hierarchy.
 	 *  @return Name of file used to represent hierarchy.
@@ -885,6 +901,35 @@ public class TreeMapProperties
 		return branchDisplacements;
 	}
 
+	/* Displays all the command line options with brief descriptions of their function.
+	 */
+	public void displayOptions(PrintStream out)
+	{
+		out.println("usage: treemappa.sh or treemappa.bat followed by at least one of "+ IN_FILE+"<treemap_file_name>, "+LOAD_CONFIG+"<config_file_name>, -"+HELP+" or -"+VERSION);
+		out.println("\nFull set of command line options where [n] is an optional number indicating hierarchy level:\n");
+	
+		for (String option : help.keySet())
+		{
+			out.println(help.get(option));
+		}
+		out.flush();
+	}
+	
+	/* Displays a compact version of all the command line options.
+	 */
+	public void displayOptionsShort(PrintStream out)
+	{
+		out.println("usage: treemappa.sh or treemappa.bat followed by at least one of "+ IN_FILE+"<treemap_file_name>, "+LOAD_CONFIG+"<config_file_name>, -"+HELP+" or -"+VERSION);
+		out.println("\nFull set of command line options:\n");
+	
+		for (String option : help.keySet())
+		{
+			out.println(help.get(option).getShortText());
+		}
+		out.flush();
+	}
+	
+	
 	// ----------------------------------- Private methods ------------------------------------
 
 	/** Sets the default treemap properties.
@@ -896,16 +941,16 @@ public class TreeMapProperties
 		properties.setProperty(BORDER.toLowerCase(),"1");
 		properties.setProperty(BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(BORDER_COLOUR.toLowerCase(),"#000000");
-		properties.setProperty(BRANCH_ALIGN_X.toLowerCase(),"3");		// Processing 'CENTER' code.
-		properties.setProperty(BRANCH_ALIGN_Y.toLowerCase(),"3");		// Processing 'CENTER' code.
+		properties.setProperty(BRANCH_ALIGN_X.toLowerCase(),"CENTER");
+		properties.setProperty(BRANCH_ALIGN_Y.toLowerCase(),"CENTER");
 		properties.setProperty(CURVE_RADIUS.toLowerCase(),"0");
 		properties.setProperty(HEIGHT.toLowerCase(),"400");
 		properties.setProperty(LABEL_BRANCHES.toLowerCase(),"false");
 		properties.setProperty(LABEL_LEAVES.toLowerCase(),"true");
 		properties.setProperty(LAYOUT.toLowerCase(),"orderedSquarified");
 		properties.setProperty(SHOW_LEAF_BORDER.toLowerCase(),"false");
-		properties.setProperty(LEAF_ALIGN_X.toLowerCase(),"3");		// Processing 'CENTER' code.
-		properties.setProperty(LEAF_ALIGN_Y.toLowerCase(),"3");		// Processing 'CENTER' code.
+		properties.setProperty(LEAF_ALIGN_X.toLowerCase(),"CENTER");
+		properties.setProperty(LEAF_ALIGN_Y.toLowerCase(),"CENTER");
 		properties.setProperty(LEAF_BORDER_COLOUR.toLowerCase(),"#000000");
 		properties.setProperty(LEAF_BORDER_WEIGHT.toLowerCase(),"-1");
 		properties.setProperty(LEAF_TEXT_COLOUR.toLowerCase(),"#00000096");
@@ -930,6 +975,57 @@ public class TreeMapProperties
 		properties.setProperty(VECTOR_WIDTH.toLowerCase(),"0.3");
 		properties.setProperty(VERBOSE.toLowerCase(),"false");
 		properties.setProperty(WIDTH.toLowerCase(),"400");
+		
+		// Build help file
+		help = new TreeMap<String, Help>();
+		
+		help.put(ALIGN,              new Help(ALIGN,             true,  new String[]{"horizontal","vertical","free"}, "Sets the orientation of treemap rectangles."));
+		help.put(ALLOW_VERTICAL,     new Help(ALLOW_VERTICAL,    false, new String[]{"true","false"},"Determines if vertical labelling is permitted."));
+		help.put(BORDER,             new Help(BORDER,            true,  new String[]{"num_pixels"},"Sets the gap between rectangles at any given level of the hierarchy."));
+		help.put(BORDER_COLOUR,      new Help(BORDER_COLOUR,     false, new String[]{"#rrggbb_hex_string"},"Sets the colour of branch borders."));
+		help.put(BORDER_WEIGHT,      new Help(BORDER_WEIGHT,     true,  new String[]{"num_pixels"},"Sets the border thickness for any level in the hierarchy."));
+		help.put(BRANCH_ALIGN_X,     new Help(BRANCH_ALIGN_X,    false, new String[]{"LEFT","CENTER","RIGHT"},"Sets the branch label justification in the horizontal direction."));
+		help.put(BRANCH_ALIGN_Y,     new Help(BRANCH_ALIGN_Y,    false, new String[]{"TOP","CENTER","BOTTOM"},"Sets the branch label justification in the vertical direction."));
+		help.put(COLOUR_TABLE,       new Help(COLOUR_TABLE,      false, new String[]{"file_name"},"Determines the colour table file to use to match colour codes to leaf colours."));
+		help.put(CURVE_RADIUS,       new Help(CURVE_RADIUS,      false, new String[]{"num_pixels"},"Sets the radius of curvature for rectangle corners."));
+		help.put(FILE_TYPE,          new Help(FILE_TYPE,         false, new String[]{"csv","csvCompact","csvSpatial","treeML"},"Indicates the file format of the tree file to be read."));
+		help.put(HEIGHT,             new Help(HEIGHT,            false, new String[]{"num_pixels"},"Sets the vertical size of the treemap."));
+		help.put(HELP,               new Help(HELP   ,           false, null, "Displays a help message listing all command line parameters."));
+		help.put(IMAGE_FILE,         new Help(IMAGE_FILE,        false, new String[]{"file_name"},"Saves an image file with the given name showing the treemap."));
+		help.put(IN_FILE,            new Help(IN_FILE,           false, new String[]{"file_name"},"Determines the name of the tree file to read."));
+		help.put(LABEL_BRANCHES,     new Help(LABEL_BRANCHES,    false, new String[]{"true","false"},"Determins whether branches are to be labelled."));
+		help.put(LABEL_LEAVES,       new Help(LABEL_LEAVES,      false, new String[]{"true","false"},"Determines whether leaves are to be labelled."));
+		help.put(LAYOUT,             new Help(LAYOUT,            true,  new String[]{"squarified","orderedSquarified","spatial","sliceAndDice","strip","pivotSize","pivotMiddle","pivotSplit","pivotSpace","morton"},"Determines the layout type for any level in the hierarchy"));
+		help.put(LEAF_ALIGN_X,       new Help(LEAF_ALIGN_X,      false, new String[]{"LEFT","CENTER","RIGHT"},"Sets the leaf label justification in the horizontal direction."));
+		help.put(LEAF_ALIGN_Y,       new Help(LEAF_ALIGN_Y,      false, new String[]{"TOP","CENTER","BOTTOM"},"Sets the leaf label justification in the vertical direction."));
+		help.put(LEAF_BORDER_COLOUR, new Help(LEAF_BORDER_COLOUR,false, new String[]{"#rrggbb_hex_string"},"Sets the colour of the leaf borders."));
+		help.put(LEAF_BORDER_WEIGHT, new Help(LEAF_BORDER_WEIGHT,false, new String[]{"num_pixels"},"Sets the leaf border thickness."));
+		help.put(LEAF_TEXT_COLOUR,   new Help(LEAF_TEXT_COLOUR,  false, new String[]{"#rrggbb_hex_string"},"Sets the colour of the leaf label text."));
+		help.put(LEAF_TEXT_FONT,     new Help(LEAF_TEXT_FONT,    false, new String[]{"font_name"},"Sets the name of the font to use for displaying labels."));
+		help.put(LEAF_VECTOR_WIDTH,  new Help(LEAF_VECTOR_WIDTH, false, new String[]{"num_pixels"},"Sets the width of leaf displacement vector lines."));
+		help.put(LOAD_CONFIG,        new Help(LOAD_CONFIG,       false, new String[]{"file_name"},"Loads a configuration file containing treemap display configuration."));
+		help.put(MAX_BRANCH_TEXT,    new Help(MAX_BRANCH_TEXT,   true,  new String[]{"num_pixels"},"Sets the maximum text size for labels at any level in the hierarchy (or 0 for no maximum size)."));
+		help.put(MAX_LEAF_TEXT,      new Help(MAX_LEAF_TEXT,     false, new String[]{"num_pixels"},"Sets the maximum text size for leaf labels (or 0 for no maximum size)."));
+		help.put(MUTATION,           new Help(MUTATION,          false, new String[]{"mutation_level"},"Sets the colour mutation level for evolutionary colour schemes (0-1)."));
+		help.put(OUT_FILE,           new Help(OUT_FILE,          false, new String[]{"file_name"},"Determines the name and format of an output file representing the treemap."));
+		help.put(RAND_COLOUR_LEVEL,  new Help(RAND_COLOUR_LEVEL, false, new String[]{"hierarchy_level"},"Hierarchy level above and at which random colours are assigned when using evolutionary colour table."));
+		help.put(SAVE_CONFIG, 		 new Help(SAVE_CONFIG,       false, new String[]{"file_name"},"Saves a configuration file with the given name."));
+		help.put(SEED,               new Help(SEED,              false, new String[]{"seed_value"},"Sets a seed for the random evolutionary colour generator."));
+		help.put(SHOW_ARROW_HEAD,    new Help(SHOW_ARROW_HEAD,   false, new String[]{"true","false"},"Determines whether or not displacement vectors show directional arrow heads."));
+		help.put(SHOW_BRANCH_DISP,   new Help(SHOW_BRANCH_DISP,  false, new String[]{"true","false"},"Determines whether or not branch displacement vector lines are shown."));
+		help.put(SHOW_LEAF_BORDER,   new Help(SHOW_LEAF_BORDER,  false, new String[]{"true","false"},"Determines whether or not leaves are shown with a border."));
+		help.put(SHOW_LEAF_DISP,     new Help(SHOW_LEAF_DISP,    false, new String[]{"true","false"},"Determines whether or not leaf displacement vector lines are shown."));
+		help.put(SHOW_STATISTICS,    new Help(SHOW_STATISTICS,   false, new String[]{"true","false"},"Determines whether or not statistics are reported when calculating treemap layout."));
+		help.put(SHOW_TREE_VIEW,     new Help(SHOW_TREE_VIEW,    false, new String[]{"true","false"},"Determines whether or not a conventional tree view of the hierarhcy is shown."));
+		help.put(TEXT_COLOUR,        new Help(TEXT_COLOUR,       true,  new String[]{"#rrggbb_hex_string"},"Sets the label text colour for any given level in the hierarchy."));
+		help.put(TEXT_FONT, 		 new Help(TEXT_FONT,		 true,  new String[]{"font_name"},"Sets the name of the font to use for displaying labels at any given level in the hierarchy."));
+		help.put(TEXT_ONLY, 		 new Help(TEXT_ONLY,		 false, new String[]{"true","false"},"Determines if only text output is generated."));
+		help.put(IS_TRANSPARENT, 	 new Help(IS_TRANSPARENT,	 false, new String[]{"true","false"},"Determines if transparency can be used in display."));
+		help.put(USE_LABELS, 		 new Help(USE_LABELS,		 false, new String[]{"true","false"},"Determines if the label value from CSV files is used to label nodes."));
+		help.put(VECTOR_WIDTH, 		 new Help(VECTOR_WIDTH,		 true,  new String[]{"num_pixels"},"Determines the width of vector branch displacement lines at any given level in the hierarchy."));
+		help.put(VERBOSE,            new Help(VERBOSE,           false, new String[]{"true","false"},"Determines if verbose output of progress in treemap creation is given."));
+		help.put(VERSION,            new Help(VERSION,           false, null, "Displays the version number of this software."));
+		help.put(WIDTH,              new Help(WIDTH,             false, new String[]{"num_pixels"},"Sets the horizontal size of the treemap."));		
 	}
 
 	/** Checks to see that either a valid level is given with a multi-level parameter or no level is given.
@@ -1102,6 +1198,71 @@ public class TreeMapProperties
 			{
 				array[i] = getHexColour(value);
 			}
+		}
+	}
+	
+	private class Help
+	{
+		String param;
+		String[] options;
+		String desc;
+		boolean isHierarchical;
+		
+		Help(String param, boolean isHierarchical, String[] options, String description)
+		{
+			this.param = param;
+			this.isHierarchical = isHierarchical;
+			this.options = options;
+			this.desc = description;
+		}
+		
+		
+		@SuppressWarnings("synthetic-access")
+		public String toString()
+		{
+			String defText = properties.getProperty(param.toLowerCase());
+			if (defText == null)
+			{
+				defText = "";
+			}
+			else
+			{
+				defText = " Default is "+defText+".";
+			}
+			if ((options == null) || (options.length==0))
+			{
+				return "-"+param+" "+desc+defText;
+			}
+			StringBuffer buf = new StringBuffer("<");
+			for (int i=0; i<options.length; i++)
+			{
+				buf.append(options[i]);
+				if (i<options.length-1)
+				{
+					buf.append(" | ");
+				}
+			}
+			buf.append("> ");
+			return param+(isHierarchical?"[n] ":" ")+buf.toString()+" "+desc+defText;
+		}
+		
+		public String getShortText()
+		{
+			if ((options == null) || (options.length==0))
+			{
+				return "-"+param;
+			}
+			StringBuffer buf = new StringBuffer(" <");
+			for (int i=0; i<options.length; i++)
+			{
+				buf.append(options[i]);
+				if (i<options.length-1)
+				{
+					buf.append("|");
+				}
+			}
+			buf.append("> ");
+			return param+(isHierarchical?"[n]":"")+buf.toString()+" ";
 		}
 	}
 }

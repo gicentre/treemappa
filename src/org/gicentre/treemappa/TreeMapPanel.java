@@ -43,10 +43,12 @@ import javax.swing.JPanel;
 
 import org.gicentre.utils.colour.ColourTable;
 
+import processing.core.PConstants;
+
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.2.1, 5th April, 2014.
  */
 // ***************************************************************************************************
 
@@ -158,8 +160,8 @@ public class TreeMapPanel extends JPanel
 		buildBranchFonts(props.getBranchTextFonts());
 
 		leafVectorWidth = props.getLeafVectorWidth();	
-		branchAlignX = props.getBranchAlignX();
-		branchAlignY = props.getBranchAlignY();
+		branchAlignX = alignTextToCode(props.getBranchAlignX());
+		branchAlignY = alignTextToCode(props.getBranchAlignY());
 		isTransparent= props.getIsTransparent();
 		randColourLevel = props.getRandColourLevel();
 		randColourLevel = props.getRandColourLevel();
@@ -168,8 +170,8 @@ public class TreeMapPanel extends JPanel
 		borderWeights = props.getBorderWeights();
 		branchTextColours = props.getBranchTextColours();
 		curveRadius = props.getCurveRadius();
-		leafAlignX = props.getLeafAlignX();
-		leafAlignY = props.getLeafAlignY();
+		leafAlignX = alignTextToCode(props.getLeafAlignX());
+		leafAlignY = alignTextToCode(props.getLeafAlignY());
 		leafTextColour = props.getLeafTextColour();
 		leafBorderColour = props.getLeafBorderColour();
 		leafBorderWeight = props.getLeafBorderWeight();
@@ -1393,6 +1395,19 @@ public class TreeMapPanel extends JPanel
 		return true;
 	}
 	
+	/** Determines the text alignment of leaf labels. Note that the treemap will not use this new setting until a call 
+	 *  to <code>updateImage()</code> is made.
+	 *  @param alignX Horizontal text alignment. Should be one of LEFT, CENTER  or RIGHT.
+	 *  @param alignY Vertical text alignment. Should be one of TOP, CENTER  or BOTTOM.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setLeafTextAlignment(String alignX, String alignY)
+	{
+		branchAlignX = alignTextToCode(alignX);
+		branchAlignY = alignTextToCode(alignY);
+		return true;
+	}
+		
 	/** Determines the text alignment of branch labels. This only has an effect when displaying treemaps in
 	 *  Processing via the PTreeMAppa class. Note that the treemap will not use this new setting until a call 
 	 *  to <code>updateImage()</code> is made.
@@ -1404,6 +1419,19 @@ public class TreeMapPanel extends JPanel
 	{
 		branchAlignX = alignX;
 		branchAlignY = alignY;
+		return true;
+	}
+	
+	/** Determines the text alignment of branch labels. Note that the treemap will not use this new setting until a call 
+	 *  to <code>updateImage()</code> is made.
+	 *  @param alignX Horizontal text alignment. Should be one of LEFT, CENTER  or RIGHT.
+	 *  @param alignY Vertical text alignment. Should be one of TOP, CENTER  or BOTTOM.
+	 *  @return True if change has been made successfully.
+	 */
+	public boolean setBranchTextAlignment(String alignX, String alignY)
+	{
+		branchAlignX = alignTextToCode(alignX);
+		branchAlignY = alignTextToCode(alignY);
 		return true;
 	}
 
@@ -1638,6 +1666,23 @@ public class TreeMapPanel extends JPanel
 	}
 
 	// ----------------------------- Private Methods -------------------------------
+	
+	/** Converts an alignment text value into its Processing numeric alignment ID.
+	 *  @param alignText Text representing alignment constant. Should be one of LEFT, CENTER, RIGHT, TOP, BOTTOM.
+	 *  @return Numeric ID representing alignment text.
+	 */
+	private static int alignTextToCode(String alignText)
+	{
+		if (alignText.trim().equalsIgnoreCase("left")) return PConstants.LEFT;
+		if ((alignText.trim().equalsIgnoreCase("center")) || (alignText.trim().equalsIgnoreCase("centre"))) return PConstants.CENTER;
+		if (alignText.trim().equalsIgnoreCase("right")) return PConstants.RIGHT;
+		if (alignText.trim().equalsIgnoreCase("top")) return PConstants.TOP;
+		if (alignText.trim().equalsIgnoreCase("bottom")) return PConstants.BOTTOM;
+		
+		// If we get this far, some unknown value has been provided.
+		System.err.println("Warning: Unknown alignment constant '"+alignText+"'. Defaulting to CENTER");
+		return PConstants.CENTER;
+	}
 
 	/** Adds the graphical representations of the given node and all its descendants
 	 *  to the main graphics panel representing the tree map.
