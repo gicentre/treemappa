@@ -311,9 +311,9 @@ public class TreeMapProperties
 				try
 				{
 					double dimension = Double.parseDouble(value);
-					if (dimension < 0)
+					if (dimension < -1)
 					{
-						System.err.println("'"+key+"' must be at least 0, but "+dimension+" was given.");
+						System.err.println("'"+key+"' must at least -1, but "+dimension+" was given.");
 						return false;
 					}
 				}

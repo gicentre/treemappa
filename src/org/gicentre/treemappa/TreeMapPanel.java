@@ -48,7 +48,7 @@ import processing.core.PConstants;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 5th April, 2014.
+ *  @version 3.2.1, 6th April, 2014.
  */
 // ***************************************************************************************************
 
@@ -1558,9 +1558,9 @@ public class TreeMapPanel extends JPanel
 	 */
 	public boolean setBorderWeight(int level, float borderWeight)
 	{
-		if ((level < 0) || (level >= borderWeights.length))
+		if ((level < -1) || (level >= borderWeights.length))
 		{
-			System.err.println("Cannot set branch maximum text size at level "+level+". Must be between 0 and "+(borderWeights.length-1));
+			System.err.println("Cannot set branch border weight at level "+level+". Must be either -1 (uses default width) or between 0 and "+(borderWeights.length-1));
 			return false;
 		}
 		borderWeights[level] = borderWeight;
