@@ -6,7 +6,7 @@ import processing.core.PApplet;
 /** Interface describing Processing version neutral versions of methods that are 
  *  incompatible between Processing 1.x and 2.x. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 25th April, 2013.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  ********************************************************************************
 
@@ -38,6 +38,7 @@ public interface VersionHandler
 	/** Should create a processing version-neutral root XML element based on the given XML file.
 	 *  @param sketch Sketch wishing to load the XML file.
 	 *  @param fileName Name of XML file to load.
+	 *  @return Abstracted XML element.
 	 */
 	public abstract AbstractXML createXML(PApplet sketch, String fileName);	
 }

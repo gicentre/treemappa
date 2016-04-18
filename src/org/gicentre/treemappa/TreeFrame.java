@@ -9,7 +9,7 @@ import org.gicentre.treemappa.gui.JWFrame;
 // ***************************************************************************************************
 /** Class to display a tree graphically as a tree map and link node tree. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */ 
 // ***************************************************************************************************
 

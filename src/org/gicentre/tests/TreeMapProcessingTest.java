@@ -11,7 +11,7 @@ import processing.core.PApplet;
 //  ****************************************************************************************
 /** Tests the Processing wrapper for the treeMappa classes.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */ 
 //  ****************************************************************************************
 
@@ -29,7 +29,6 @@ import processing.core.PApplet;
  * http://www.gnu.org/licenses/.
  */
 
-@SuppressWarnings("serial")
 public class TreeMapProcessingTest extends PApplet
 {
 	// ------------------------------ Starter method ------------------------------- 
@@ -50,11 +49,18 @@ public class TreeMapProcessingTest extends PApplet
 	
 	// ---------------------------- Processing methods -----------------------------
 
-	/** Initialises the sketch.
+	/** Initial window settings prior to setup().
+	 */
+	public void settings()
+	{   
+		size(1200,800);
+		pixelDensity(displayDensity());		// Use platform's maximum display density.
+	}
+	
+	/** Sets up the sketch.
 	 */
 	public void setup()
 	{   
-		size(1200,800);
 		zoomer = new ZoomPan(this);
 
 		// Create an empty treemap.    

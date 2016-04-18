@@ -3,7 +3,7 @@ package org.gicentre.treemappa;
 //  ***********************************************************************
 /** Represents the types of layout supported by the TreeMap application.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 23rd February, 2011.
+ *  @version 3.3.0, 18th April, 2016.
  */ 
 //  ***********************************************************************
 
@@ -23,18 +23,19 @@ package org.gicentre.treemappa;
 
 public enum Layout 
 { 
-	/** Indicates slice and dice layout. */		SLICE_AND_DICE,
-	/** Indicates squarified layout. */			SQUARIFIED,
-	/** Indicates ordered squarified layout. */	ORDERED_SQUARIFIED,
-	/** Indicates Morton ordered layout. */		MORTON, 
-	/** Indicates spatial layout. */				SPATIAL, SPATIAL_AV,
+	/** Indicates slice and dice layout. */			SLICE_AND_DICE,
+	/** Indicates squarified layout. */				SQUARIFIED,
+	/** Indicates ordered squarified layout. */		ORDERED_SQUARIFIED,
+	/** Indicates Morton ordered layout. */			MORTON, 
+	/** Indicates spatial layout. */				SPATIAL, 
+	/** Indicates spatial average layout. */		SPATIAL_AV,
 	/** Indicates pivot by middle layout. */		PIVOT_MIDDLE,
 	/** Indicates pivot by size layout. */			PIVOT_SIZE,
 	/** Indicates pivot by split size layout. */	PIVOT_SPLIT_SIZE,
-	/** Indicates pivot by space layout. */		PIVOT_SPACE,
+	/** Indicates pivot by space layout. */			PIVOT_SPACE,
 	/** Indicates strip map layout. */				STRIP,
-	/** Indicates layout should partition space in horizontal strips.*/ HORIZONTAL,
-	/** Indicates layout should partition space in vertical strips.*/ VERTICAL,
+	/** Indicates layout should partition space in horizontal strips.*/				 HORIZONTAL,
+	/** Indicates layout should partition space in vertical strips.*/ 				 VERTICAL,
 	/** Indicates layout is not constrained in a horizontal or vertical direction.*/ FREE;
 
 	public String toString()
@@ -69,8 +70,8 @@ public enum Layout
 				return "Layout in vertical columns";
 			case FREE:
 				return "Unconstrained layout";
-		}
-		// We shouldn't ever get to this line.
-		return super.toString();
+			default:
+				return super.toString();		// We shouldn't ever get to this line.		
+		}	
 	}
 }

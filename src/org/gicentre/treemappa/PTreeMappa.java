@@ -2,11 +2,11 @@ package org.gicentre.treemappa;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.gicentre.treemappa.gui.Drawable;
 import org.gicentre.treemappa.version.AbstractXML;
-import org.gicentre.treemappa.version.Ver15;
 import org.gicentre.treemappa.version.Ver20;
 import org.gicentre.treemappa.version.VersionHandler;
 import org.gicentre.utils.colour.ColourTable;
@@ -20,7 +20,7 @@ import processing.core.PImage;
 //  ********************************************************************************
 /** Wrapper class to allow Processing sketches to load, create and draw treemaps. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  ********************************************************************************
 
@@ -96,7 +96,8 @@ public class PTreeMappa
 		catch (Throwable e)
 		{
 			// If a Processing 2.x version handler failed, silently revert to a Processing 1.5 version
-			versionHandler = new Ver15(parent);
+			System.err.println("Processing 1.5.x detected. Use earlier version of TreeMappa (3.2 or below).");
+			System.exit(-1);
 		}
 		
 		this.parent = parent;
@@ -107,11 +108,22 @@ public class PTreeMappa
 		// Default size is that of the sketch unless it is specified in a user config file.
 		treeMappa.getConfig().setParameter(TreeMapProperties.WIDTH, Integer.toString(parent.width));
 		treeMappa.getConfig().setParameter(TreeMapProperties.HEIGHT, Integer.toString(parent.height));
-				
-		InputStream configStream = parent.createInput(configFileName);
-		if (configStream != null)
+
+		if (configFileName != null)
 		{
-			props.load(configStream);
+			InputStream configStream = parent.createInput(configFileName);
+			if (configStream != null)
+			{
+				props.load(configStream);
+				try
+				{
+					configStream.close();
+				}
+				catch (IOException e)
+				{
+					System.err.println("Problem closing config stream: "+e);
+				}
+			}
 		}
 		
 		// Set the treemap panel dimensions if not default.
@@ -170,7 +182,7 @@ public class PTreeMappa
 	}
 	
 	/** Builds the treemap from the hierarchical data stored in this object. This method should be called in preference
-	 *  to <ode>buildTreeMap()</code> in the <code>TreeMappa</code> class since it will update the treemap panel used
+	 *  to <code>buildTreeMap()</code> in the <code>TreeMappa</code> class since it will update the treemap panel used
 	 *  for drawing in Processing.
 	 *  @return True if the tree has been built without problems.
 	 */
@@ -746,7 +758,7 @@ public class PTreeMappa
 		String[] attributes = xmle.listAttributes();
 		for (String attribute : attributes)
 		{
-			dom.addAttribute(attribute,xmle.getString(attribute), domNode);
+			DOMProcessor.addAttribute(attribute,xmle.getString(attribute), domNode);
 		}
 		
 		// Copy node text if it exists.

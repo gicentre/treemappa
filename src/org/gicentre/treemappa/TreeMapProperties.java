@@ -17,7 +17,7 @@ import java.util.TreeMap;
 /** Provides a persistent store of all treeMappa configuration options such as layout, text colours etc.
  *  This can be instantiated at run time, saved to and loaded from a file and passed to a TreeMappa object.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 6th April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */
 // ********************************************************************************************************
 
@@ -901,7 +901,8 @@ public class TreeMapProperties
 		return branchDisplacements;
 	}
 
-	/* Displays all the command line options with brief descriptions of their function.
+	/** Displays all the command line options with brief descriptions of their function.
+	 *  @param out Output stream in which to report options.
 	 */
 	public void displayOptions(PrintStream out)
 	{
@@ -915,7 +916,8 @@ public class TreeMapProperties
 		out.flush();
 	}
 	
-	/* Displays a compact version of all the command line options.
+	/** Displays a compact version of all the command line options.
+	 *  @param out Output stream in which to report options.
 	 */
 	public void displayOptionsShort(PrintStream out)
 	{
@@ -1035,7 +1037,7 @@ public class TreeMapProperties
 	 *  @param full Full parameter text including possible level modifier.
 	 *  @return Validated level parameter or null if problem extracting level.
 	 */
-	private String checkLevel(String base, String full)
+	private static String checkLevel(String base, String full)
 	{
 		if (full.equalsIgnoreCase(base))
 		{

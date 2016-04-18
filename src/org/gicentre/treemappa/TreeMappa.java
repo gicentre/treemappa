@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 //  **************************************************************************
 /** Class to read tree data and create treemaps and treemap output files. 
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 9th July, 2012.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  **************************************************************************
 
@@ -195,7 +195,24 @@ public class TreeMappa
 			if (readTreeML(pTreeMappa.createDOM(),props.getInFileName(),useLabels) == false)
 			{
 				System.err.println("Problem reading treeML file.");
+				
+				try
+				{	
+					bReader.close();
+				}
+				catch (IOException e)
+				{
+					System.err.println("Problem closing tree file.");
+				}
 				return false;
+			}
+			try
+			{	
+				bReader.close();
+			}
+			catch (IOException e)
+			{
+				System.err.println("Problem closing tree file.");
 			}
 			return false;
 		}
@@ -204,6 +221,14 @@ public class TreeMappa
 			if (readCSV(bReader,useLabels,CSV) == false)
 			{
 				System.err.println("Problem reading CSV file.");
+				try
+				{	
+					bReader.close();
+				}
+				catch (IOException e)
+				{
+					System.err.println("Problem closing tree file.");
+				}
 				return false;
 			}
 		}
@@ -212,6 +237,14 @@ public class TreeMappa
 			if (readCSV(bReader,useLabels,CSV_COMPACT) == false)
 			{
 				System.err.println("Problem reading compact CSV file.");
+				try
+				{	
+					bReader.close();
+				}
+				catch (IOException e)
+				{
+					System.err.println("Problem closing tree file.");
+				}
 				return false;
 			}
 		}
@@ -220,17 +253,41 @@ public class TreeMappa
 			if (readCSV(bReader,useLabels,CSV_SPATIAL) == false)
 			{
 				System.err.println("Problem reading spatial CSV file.");
+				try
+				{	
+					bReader.close();
+				}
+				catch (IOException e)
+				{
+					System.err.println("Problem closing tree file.");
+				}
 				return false;
 			}
 		}
 		else
 		{
 			System.err.println("Unknown file type: '"+fileType+"'");
+			try
+			{	
+				bReader.close();
+			}
+			catch (IOException e)
+			{
+				System.err.println("Problem closing tree file.");
+			}
 			return false;
 		}
 
 		// No problems if we get this far.
 		needsRebuild = true;
+		try
+		{	
+			bReader.close();
+		}
+		catch (IOException e)
+		{
+			System.err.println("Problem closing tree file.");
+		}
 		return true;
 	}
 
@@ -330,7 +387,7 @@ public class TreeMappa
 		return true;
 	}
 
-	private boolean isAdjacent(TreeMapNode n1, TreeMapNode n2)
+	private static boolean isAdjacent(TreeMapNode n1, TreeMapNode n2)
 	{
 		if (n1.equals(n2))
 		{
@@ -665,6 +722,7 @@ public class TreeMappa
 	 *  @return True if leaf nodes are to be laid out with borders.
 	 *  @deprecated Should use getShowLeafBorders() instead.
 	 */
+	@Deprecated
 	public boolean getAllowLeafBorders()
 	{
 		return getShowLeafBorders();
@@ -716,7 +774,8 @@ public class TreeMappa
 	}
 	
 	/** Determines whether or not leaf nodes have borders.
-	 *  @param allowLeafBorders
+	 *  @param allowLeafBorders Leaf borders permitted if true.
+	 *  @return True if leaf node property has been set as intended.
 	 */
 	public boolean setAllowLeafBorders(boolean allowLeafBorders)
 	{
@@ -1267,7 +1326,7 @@ public class TreeMappa
 			System.err.println("No <tree> node found in TreeML file "+fullFileName);
 			return false;
 		}        
-		Node[] children = dom.getNodeElements("branch", trees[0]);
+		Node[] children = DOMProcessor.getNodeElements("branch", trees[0]);
 
 		if (children.length < 1)
 		{
@@ -2094,7 +2153,7 @@ public class TreeMappa
 	 * @param rect Rectangle in which to lay out nodes.
 	 * @param alignment Alignment constraint (HORIZONTAL, VERTICAL or FREE if no constraint).
 	 */
-	private void stripMap(List<TreeMapNode>nodes, Rectangle2D rect, Layout alignment) 
+	private static void stripMap(List<TreeMapNode>nodes, Rectangle2D rect, Layout alignment) 
 	{
 		List<TreeMapNode> row = new Vector<TreeMapNode>();
 		double avAspectRatio = Double.MAX_VALUE, newAvAspectRatio,layoutSide=0;
@@ -2357,7 +2416,7 @@ public class TreeMappa
 	 * @param row1AR Aspect ratio of the current row to lay out.
 	 * @param width Width of strip in which to place nodes.
 	 */
-	private void lookahead(List<TreeMapNode>nodes, List<TreeMapNode>row1, double row1AR, double width) 
+	private static void lookahead(List<TreeMapNode>nodes, List<TreeMapNode>row1, double row1AR, double width) 
 	{
 		List<TreeMapNode> row2 = new Vector<TreeMapNode>();
 		double row2AR = Double.MAX_VALUE, newRow2AR;
@@ -2417,7 +2476,7 @@ public class TreeMappa
 	 * @param rect Rectangle in which to lay out nodes.
 	 * @param alignment Alignment constraint (HORIZONTAL, VERTICAL or FREE if no constraint).
 	 */
-	private void sliceAndDice(List<TreeMapNode>nodes, Rectangle2D rect, Layout alignment) 
+	private static void sliceAndDice(List<TreeMapNode>nodes, Rectangle2D rect, Layout alignment) 
 	{
 		// Simply lay out all sibling nodes along the longer side of the containing rectangle.
 		if (alignment == Layout.FREE)
@@ -2438,7 +2497,7 @@ public class TreeMappa
 	 * @param nodes Nodes to lay out.
 	 * @param rectangle Rectangle in which to lay out nodes.
 	 */
-	private void mortonise(MortonList<TreeMapNode>nodes, Rectangle2D rectangle) 
+	private static void mortonise(MortonList<TreeMapNode>nodes, Rectangle2D rectangle) 
 	{
 		List<TreeMapNode> column = new Vector<TreeMapNode>();
 		int nodesToProcess = nodes.size();
@@ -2483,7 +2542,7 @@ public class TreeMappa
 	 * @param alignment If Layout.FREE alignment is determined by sideLength, otherwise determined by Layout.VERTICAL or Layout.HORIZONTAL.
 	 * @return Remaining rectangular space after nodes have been laid out.
 	 */
-	private Rectangle2D layoutLine(List<TreeMapNode> nodes, double sideLength, Rectangle2D rect, Layout alignment)
+	private static Rectangle2D layoutLine(List<TreeMapNode> nodes, double sideLength, Rectangle2D rect, Layout alignment)
 	{ 
 		double s = 0; // sum of row areas
 
@@ -2561,7 +2620,7 @@ public class TreeMappa
 	 * @param rect Rectangle in which to lay out nodes.
 	 * @return Remaining rectangular space after nodes have been laid out.
 	 */
-	private Rectangle2D layoutColumn(List<TreeMapNode> nodes, Rectangle2D rect)
+	private static Rectangle2D layoutColumn(List<TreeMapNode> nodes, Rectangle2D rect)
 	{ 
 		double s = 0; // sum of row areas
 
@@ -2633,7 +2692,7 @@ public class TreeMappa
 	 *  @param targetAspectRatio Target aspect ratio being aimed for.
 	 *  @return Highest aspect ratio produced by the given nodes if arranged along the given length.
 	 */
-	private double getWorstAspectRatio(List<TreeMapNode> nodes, double sideLength, double targetAspectRatio) 
+	private static double getWorstAspectRatio(List<TreeMapNode> nodes, double sideLength, double targetAspectRatio) 
 	{
 		double aMax = -Double.MAX_VALUE, 
 		aMin = Double.MAX_VALUE, 
@@ -2656,7 +2715,7 @@ public class TreeMappa
 	 * @param sideLength Length of side along which nodes are to be laid out.
 	 * @return Mean aspect ratio produced by the given nodes if arranged along the given length.
 	 */
-	private double getAvAspectRatio(List<TreeMapNode> nodes, double sideLength) 
+	private static double getAvAspectRatio(List<TreeMapNode> nodes, double sideLength) 
 	{
 		double totalArea = 0.0;
 		double sideLengthSq = sideLength*sideLength;
@@ -2780,14 +2839,14 @@ public class TreeMappa
 			TreeMapNode thisNode = null;
 
 			// See if we have an attribute attached to this branch.
-			Node[] attribs = dom.getNodeElements("attribute", branch);
+			Node[] attribs = DOMProcessor.getNodeElements("attribute", branch);
 			String branchName = new String("n/a");
 
 			for (Node attrib : attribs)
 			{
-				if (dom.getNodeAttribute("name", attrib) != null)
+				if (DOMProcessor.getNodeAttribute("name", attrib) != null)
 				{
-					branchName = dom.getNodeAttribute("value", attrib);
+					branchName = DOMProcessor.getNodeAttribute("value", attrib);
 				}
 			}
 
@@ -2810,24 +2869,24 @@ public class TreeMappa
 			}
 
 			// See if we have any leaves attached to this branch.
-			Node[] leaves = dom.getNodeElements("leaf", branch);
+			Node[] leaves = DOMProcessor.getNodeElements("leaf", branch);
 
 			for (Node leaf : leaves)
 			{
-				attribs = dom.getNodeElements("attribute", leaf);
+				attribs = DOMProcessor.getNodeElements("attribute", leaf);
 				String leafName = new String("n/a");
 				Float sizeValue = new Float(1);			// Default size value is 1.
 
 				for (Node attrib : attribs)
 				{
-					String attName = dom.getNodeAttribute("name", attrib); 
+					String attName = DOMProcessor.getNodeAttribute("name", attrib); 
 					if (attName.equalsIgnoreCase("name"))
 					{
-						leafName = dom.getNodeAttribute("value", attrib);
+						leafName = DOMProcessor.getNodeAttribute("value", attrib);
 					}
 					else if (attName.equalsIgnoreCase("number"))
 					{
-						sizeValue = new Float(dom.getNodeAttribute("value", attrib));
+						sizeValue = new Float(DOMProcessor.getNodeAttribute("value", attrib));
 					}
 				}
 				TreeMapNode newNode = new TreeMapNode(leafName,0,sizeValue,null); 
@@ -2843,7 +2902,7 @@ public class TreeMappa
 			}
 
 			// Look for sub-trees.
-			Node[] children = dom.getNodeElements("branch", branch);
+			Node[] children = DOMProcessor.getNodeElements("branch", branch);
 
 			if (children.length > 0)
 			{
@@ -2872,7 +2931,7 @@ public class TreeMappa
 	 * @param node Node to consider.
 	 * @return Number of pixels occupied by this node in the treemap.
 	 */ 
-	private double getArea(TreeMapNode node)
+	private static double getArea(TreeMapNode node)
 	{
 		return node.getArea();
 	}

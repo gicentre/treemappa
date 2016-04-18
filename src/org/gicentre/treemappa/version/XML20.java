@@ -6,7 +6,7 @@ import processing.data.XML;
 //***************************************************************************************
 /** Provides a Processing 1.5 compatible implementation of the version-neutral interface.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 25th April, 2013.
+ *  @version 3.3.0, 18th April, 2016.
  */
 // **************************************************************************************
 

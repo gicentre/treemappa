@@ -8,11 +8,11 @@ import java.nio.channels.*;
 
 //  ****************************************************************************************************
 /** Represents the header of a Dbase III file. This code is based on the class provided as part
- *  of the Geotools OpenSource mapping toolkit - <a href="http://www.geotools.org">www.geotools.org/</a>
+ *  of the Geotools OpenSource mapping toolkit - www.geotools.org
  *  under the GNU Lesser General Public License. That in turn is based on the original code in
- *  the GISToolkit project - <a href="http://gistoolkit.sourceforge.net">gistoolkit.sourceforge.net</a>.
+ *  the GISToolkit project - gistoolkit.sourceforge.net.
  *  @author Geotools/GISToolkit modified by Jo Wood, giCentre.
- *  @version 3.2.0, 24th February, 2011.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  ****************************************************************************************************
 
@@ -662,7 +662,7 @@ public class DbaseFileHeader
       * @param channel Channel via which to do the reading. 
       * @throws IOException If end of file has been reached when attempting to read.
       */
-    private void read(ByteBuffer buffer,ReadableByteChannel channel) throws IOException 
+    private static void read(ByteBuffer buffer,ReadableByteChannel channel) throws IOException 
     {
         while (buffer.remaining() > 0) 
         {

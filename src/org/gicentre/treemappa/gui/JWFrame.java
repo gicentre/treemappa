@@ -11,13 +11,13 @@ import java.net.*;             // For icon handling.
 /** Creates a containing window with status, progress, menu and  toolbar options. If this window 
  *  contains any buttons on its toolbar, it must contain equivalent menu items. Menu items need not
  *  have equivalent toolbar buttons.
- *  <br /><br />
+ *  <br><br>
  *  Menus are aligned with space for iconic representation. If icons are used they should be all the 
  *  same size (16x16 recommended). Alignment is forced by inserting blank icons of the same size where
  *  necessary. This icon should be located at images/blank.gif in the classpath of the VM that uses 
  *  this class.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 23rd March, 2011.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  ***************************************************************************************************
 
@@ -285,7 +285,7 @@ public class JWFrame extends JFrame implements Runnable
 	 * adding other menus/menu items to the menu.
 	 * @param menu Menu onto which a separator.
 	 */
-	public void addMenuSeparator(JMenu menu)
+	public static void addMenuSeparator(JMenu menu)
 	{
 		menu.addSeparator();
 	}
@@ -839,7 +839,7 @@ public class JWFrame extends JFrame implements Runnable
 	 * @param filename Full file name.
 	 * @return File name without extension.
 	 */
-	private String getBody(String filename)
+	private static String getBody(String filename)
 	{
 		int i = filename.lastIndexOf('.');
 
@@ -855,7 +855,7 @@ public class JWFrame extends JFrame implements Runnable
 	 * @param filename Full file name.
 	 * @return File name extension.
 	 */
-	private String getExtension(String filename)
+	private static String getExtension(String filename)
 	{
 		int i = filename.lastIndexOf('.');
 
@@ -937,7 +937,7 @@ public class JWFrame extends JFrame implements Runnable
 		} 
 	}
 
-	/** Customised checkbox that uses a user-defined 16x16 icon instead of the L&F's
+	/** Customised checkbox that uses a user-defined 16x16 icon instead of the L&amp;F's
 	 *  checkbox.
 	 */ 
 	private class MyCheckBoxMenuItem extends JMenuItem

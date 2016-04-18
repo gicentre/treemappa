@@ -48,7 +48,7 @@ import processing.core.PConstants;
 // ***************************************************************************************************
 /** Class to provide a visual representation of the tree map.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 6th April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */
 // ***************************************************************************************************
 
@@ -1502,7 +1502,8 @@ public class TreeMapPanel extends JPanel
 	/** Determines whether or not leaf nodes are to be laid out with borders. Note that since this 
 	 *  operation requires the recalculation of the treemap layout, no changes will be made until
 	 *  <code>updateLayout()</code> is called.
-	 *  @param allowLeafBorders
+	 *  @param allowLeafBorders Leaf borders permitted if true.
+	 *  @return True if leaf border properties have been set as intended.
 	 */
 	public boolean setShowLeafBorders(boolean allowLeafBorders)
 	{
@@ -1844,7 +1845,7 @@ public class TreeMapPanel extends JPanel
 	 * @param showHead Arrow head drawn if true.
 	 * @return Path representing the arrow.
 	 */
-	private GeneralPath getArrow(float p1x, float p1y, float p2x, float p2y, float lineWidth, boolean showHead)
+	private static GeneralPath getArrow(float p1x, float p1y, float p2x, float p2y, float lineWidth, boolean showHead)
 	{
 		GeneralPath path = new GeneralPath();
 
@@ -1886,7 +1887,7 @@ public class TreeMapPanel extends JPanel
 	 * @param showHead Arrow head drawn if true.
 	 * @return SVG text representing the arrow.
 	 */
-	private String getSVGArrow(double p1x, double p1y, double p2x, double p2y, double lineWidth, boolean showHead)
+	private static String getSVGArrow(double p1x, double p1y, double p2x, double p2y, double lineWidth, boolean showHead)
 	{
 		// Set the control point to 60 to the right of the vector, along a quarter its length
 		double x = (p2x-p1x)/4.0;
@@ -2266,7 +2267,7 @@ public class TreeMapPanel extends JPanel
 	 * @param outFile Buffered file writer to receive the text.
 	 * @return true if written successfully.
 	 */
-	private boolean writeLine(String text, BufferedWriter outFile)
+	private static boolean writeLine(String text, BufferedWriter outFile)
 	{
 		try
 		{

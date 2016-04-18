@@ -8,9 +8,9 @@ import java.nio.channels.*;
 
 //  ************************************************************************************************
 /** Used to write Dbase III files. This code is based on the class provided as part of the Geotools
- *  OpenSource mapping toolkit - <a href="http://www.geotools.org/">http://www.geotools.org/</a>
+ *  OpenSource mapping toolkit - http://www.geotools.org
  *  under the GNU Lesser General Public License. The general use of this class is:
- *  <code><pre>
+ *  <pre>
  *  DbaseFileHeader header = ...
  *  WritableFileChannel out = new FileOutputStream("thefile.dbf").getChannel();
  *  DbaseFileWriter w = new DbaseFileWriter(header,out);
@@ -19,10 +19,10 @@ import java.nio.channels.*;
  *    w.write( getMyRecord() );
  *  }
  *  w.close();
- *  </pre></code>
+ *  </pre>
  *  You must supply the <code>moreRecords</code> and <code>getMyRecord()</code> logic.
  *  @author Ian Schneider with minor modifications by Jo Wood, giCentre.
- *  @version 3.2.0, 24th February, 2011.
+ *  @version 3.3.0, 18th April, 2016.
  */
 //  ************************************************************************************************
 

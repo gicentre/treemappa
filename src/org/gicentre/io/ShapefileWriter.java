@@ -13,7 +13,7 @@ import org.gicentre.treemappa.TreeMapNode;
  *  containing the file offsets for the components that make up the geometry; and 
  *  <code><i>name</i>.dbf</code> containing the attributes.
   * @author Jo Wood, giCentre.
-  * @version 3.2.0, 24th February, 2011.
+  * @version 3.3.0, 18th April, 2016.
   */
 //  ***********************************************************************************************
 
@@ -180,7 +180,8 @@ public class ShapefileWriter
             
             header.setNumRecords(numRecords);
 
-            FileChannel channel = new FileOutputStream(fileName).getChannel();
+            FileOutputStream fos = new FileOutputStream(fileName);
+            FileChannel channel = fos.getChannel();
             DbaseFileWriter writer = new DbaseFileWriter(header,channel);
             int id = 1;
             
@@ -219,6 +220,8 @@ public class ShapefileWriter
             	} 
             }
             writer.close();
+            channel.close();
+            fos.close();
         }
 
         catch (IOException e)

@@ -3,7 +3,7 @@ package org.gicentre.treemappa;
 //***************************************************************************************************
 /** Describes the version number and date of the treemappa library.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.3.0, 18th April, 2016
  */
 // ***************************************************************************************************
 
@@ -23,8 +23,8 @@ package org.gicentre.treemappa;
 
 public class Version 
 {
-    private static final float  VERSION = 3.21f;
-    private static final String VERSION_TEXT = "treeMappa V3.2.1, 6th April, 2014";
+    private static final float  VERSION = 3.30f;
+    private static final String VERSION_TEXT = "treeMappa V3.3.0, 18th April, 2016";
 
     /** Reports the current version of the treeMappa library.
       * @return Text describing the current version of this library.

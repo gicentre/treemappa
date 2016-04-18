@@ -7,7 +7,7 @@ import processing.core.PApplet;
 //  ****************************************************************************************
 /** Tests reading a TreeML format file and creating a deep, unbalanced treemap.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 3.2.1, 3rd April, 2014.
+ *  @version 3.3.0, 18th April, 2016.
  */ 
 //  ****************************************************************************************
 
@@ -25,7 +25,6 @@ import processing.core.PApplet;
  * http://www.gnu.org/licenses/.
  */
 
-@SuppressWarnings("serial")
 public class TreeMLTest extends PApplet
 {
 	// ------------------------------ Starter method ------------------------------- 
@@ -45,11 +44,18 @@ public class TreeMLTest extends PApplet
 
 	// ---------------------------- Processing methods -----------------------------
 
-	/** Initialises the sketch.
+	/** Initial window settings prior to setup().
+	 */
+	public void settings()
+	{   
+		size(1000,700);
+		pixelDensity(displayDensity());		// Use platform's maximum display density.
+	}
+	
+	/** Sets up the sketch.
 	 */
 	public void setup()
 	{   
-		size(1000,700);
 		zoomer = new ZoomPan(this);  
 
 		// Display labels in a serif font

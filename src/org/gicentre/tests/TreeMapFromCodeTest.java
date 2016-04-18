@@ -11,7 +11,7 @@ import processing.core.PApplet;
 /** Creates a treemap programmatically. Tests the ability to pass data into a treemap without
  *  reading files as well as custom appearance in Processing.
  *  @author Jo Wood, giCentre, City University London.
- *  @version 3.2.1, 3rd April, 2013
+ *  @version 3.3, 18th April, 2016.
  */ 
 //  ****************************************************************************************
 
@@ -29,7 +29,6 @@ import processing.core.PApplet;
  * http://www.gnu.org/licenses/.
  */
 
-@SuppressWarnings("serial")
 public class TreeMapFromCodeTest extends PApplet
 {
 	// ------------------------------ Starter method ------------------------------- 
@@ -49,13 +48,19 @@ public class TreeMapFromCodeTest extends PApplet
 	
 	
 	// ---------------------------- Processing methods -----------------------------
-	
-	/** Initialises the sketch.
+
+	/** Initial window settings prior to setup().
 	 */
-	public void setup()
+	public void settings()
 	{   
 		size(1200,800);
-		smooth();
+		pixelDensity(displayDensity());		// Use platform's maximum display density.
+	}
+	
+	/** Sets up the sketch.
+	 */
+	public void setup()
+	{    		
 		zoomer = new ZoomPan(this);
 
 		// Create the treemap.    

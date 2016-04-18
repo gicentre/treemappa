@@ -12,7 +12,7 @@ import javax.swing.tree.*;
  *  the size of the node, a numeric value representing the colour of the node and the sum of numeric
  *  size values below it in the tree.
  *  @author Jo Wood, giCentre.
- *  @version 3.2.1, 7th July, 2012
+ *  @version 3.3.0, 18th April, 2016.
  */ 
 // ****************************************************************************************************
 
@@ -657,8 +657,8 @@ public class TreeMapNode implements MutableTreeNode, Comparable<TreeMapNode>,Ite
 	 *       undefined then,</li>
 	 *   <li>Compare the labels of the two node alphabetically. If they are equal then,</li>
 	 *   <li>Compare the hash codes of the two nodes</li>
-	 *  </ul>
-	 *  Nodes will therefore only be considered equal if they are identical object references.</br />
+	 *  </ol>
+	 *  Nodes will therefore only be considered equal if they are identical object references.<br>
 	 *  For alternative ordering of nodes (e.g. alphabetical ordering of node labels), provide a <code>Comparator</code>
 	 *  object when calling <code>sortChildren()</code> or <code>sortDescendants()</code>.
 	 *  @param node Node with which to compare this one.
