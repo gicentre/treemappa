@@ -223,6 +223,8 @@ public class PTreeMappa
 	 */
 	public void draw(float x, float y, float w, float h)
 	{
+		// TODO: Rectangle coordinates as provided by node.getRectangle() do not take into account this transformation.
+		//       Need to add method getTransformedRectangle() or similar.
 		parent.pushMatrix();
 
 		parent.translate(x,y);
